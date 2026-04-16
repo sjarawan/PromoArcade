@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>Tire Roll — Les Schwab Tires</title>
+<meta name="description" content="Bounce the tire over obstacles. Hit the distance target to unlock a reward!"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Inter:wght@500;700&display=swap" rel="stylesheet"/>
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  :root{--red:#C8102E;--black:#1A1A1A;--gray:#4A4A4A;--light:#E8E8E8;--white:#FFF}
+  html,body{height:100%;overflow:hidden;background:var(--black);font-family:'Inter',sans-serif;user-select:none;-webkit-user-select:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+  #game{position:fixed;inset:0;overflow:hidden;background:linear-gradient(180deg,#6B8CAE 0%,#98B4CC 40%,#7A6E5D 55%,#3A3028 100%);cursor:pointer}
+  .ground{position:absolute;bottom:0;left:0;right:0;height:100px;background:linear-gradient(180deg,#5A4E3E,#2A2018);box-shadow:inset 0 4px 12px rgba(0,0,0,.3)}
+  .ground::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:repeating-linear-gradient(90deg,var(--white) 0 20px,transparent 20px 40px);opacity:.4}
+  #hud{position:absolute;top:0;left:0;right:0;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;z-index:5;pointer-events:none}
+  .brand{background:var(--red);padding:10px 18px;border-radius:0;box-shadow:0 4px 12px rgba(0,0,0,.4);border-left:4px solid var(--black);border-right:4px solid var(--black)}
+  .brand-name{font-family:'Oswald';font-weight:700;font-size:18px;color:var(--white);line-height:1;letter-spacing:2px}
+  .brand-sub{font-size:9px;color:rgba(255,255,255,.8);font-weight:700;letter-spacing:3px;margin-top:2px}
+  .score-box{background:var(--black);color:var(--white);padding:10px 18px;text-align:right;border:2px solid var(--red)}
+  .score-lbl{font-family:'Oswald';font-size:10px;letter-spacing:2px;color:var(--red);line-height:1}
+  .score-val{font-family:'Oswald';font-weight:700;font-size:26px;line-height:1.1}
+  #tire{position:absolute;width:70px;height:70px;border-radius:50%;background:radial-gradient(circle at 50% 50%,var(--gray) 30%,var(--black) 100%);box-shadow:0 6px 16px rgba(0,0,0,.5),inset 0 0 20px rgba(0,0,0,.6);border:6px solid var(--black);will-change:transform,left,top;z-index:3}
+  #tire::before{content:'';position:absolute;inset:10px;border-radius:50%;background:radial-gradient(circle,var(--light) 20%,var(--gray) 100%);border:3px solid var(--black)}
+  #tire::after{content:'';position:absolute;inset:22px;border-radius:50%;background:var(--black)}
+  .obstacle{position:absolute;bottom:100px;background:linear-gradient(180deg,var(--red),#8A0A1F);will-change:left;border:2px solid var(--black);border-radius:4px 4px 0 0;display:flex;align-items:center;justify-content:center;color:var(--white);font-family:'Oswald';font-size:12px;letter-spacing:1px;font-weight:700}
+  .cloud{position:absolute;background:rgba(255,255,255,.7);border-radius:50%;will-change:left}
+  .power-ring{position:absolute;top:90px;left:50%;transform:translateX(-50%);width:80px;height:80px;border-radius:50%;border:4px solid var(--red);opacity:0;pointer-events:none}
+  .power-ring.active{animation:ring .6s}
+  @keyframes ring{0%{opacity:1;transform:translateX(-50%) scale(.5)}100%{opacity:0;transform:translateX(-50%) scale(1.5)}}
+  .instr{position:absolute;top:80px;left:0;right:0;text-align:center;color:var(--white);font-family:'Oswald';font-size:14px;letter-spacing:3px;font-weight:700;z-index:4;text-shadow:0 2px 4px rgba(0,0,0,.6)}
+  .screen{position:absolute;inset:0;background:rgba(26,26,26,.95);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;z-index:20;padding:20px}
+  .screen.hidden{display:none}
+  .panel{background:var(--white);border-top:6px solid var(--red);border-radius:6px;padding:32px 28px;max-width:360px;width:100%;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.6)}
+  .tag{font-family:'Oswald';font-size:12px;letter-spacing:4px;color:var(--red);font-weight:700}
+  .title{font-family:'Oswald';font-weight:700;font-size:46px;color:var(--black);line-height:1;margin:8px 0;letter-spacing:2px}
+  .title em{font-style:normal;color:var(--red)}
+  .desc{font-size:13px;color:var(--gray);line-height:1.5;margin-bottom:22px}
+  .btn{background:var(--red);color:var(--white);border:none;padding:14px 40px;font-family:'Oswald';font-size:18px;font-weight:700;letter-spacing:3px;cursor:pointer;border-radius:0;transition:transform .1s;box-shadow:0 5px 0 var(--black)}
+  .btn:active{transform:translateY(3px);box-shadow:0 2px 0 var(--black)}
+  .btn.outline{background:transparent;color:var(--black);border:2px solid var(--black);margin-top:10px;padding:10px 28px;font-size:13px;box-shadow:none}
+  .final-score{font-family:'Oswald';font-weight:700;font-size:72px;color:var(--red);line-height:1}
+  .final-lbl{font-family:'Oswald';font-size:11px;letter-spacing:3px;color:var(--gray);margin:8px 0;font-weight:700}
+  .coupon{background:var(--black);color:var(--white);border:3px dashed var(--red);padding:16px;margin-bottom:16px}
+  .coupon-title{font-family:'Oswald';font-size:12px;letter-spacing:2px;color:var(--red);font-weight:700;margin-bottom:6px}
+  .coupon-code{font-family:'Oswald';font-size:24px;color:var(--white);letter-spacing:3px;font-weight:700}
+  .coupon-sub{font-size:11px;color:rgba(255,255,255,.8);margin-top:4px;font-weight:700}
+  .logo-slot{width:80px;height:80px;background:var(--black);border:4px solid var(--red);margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:44px}
+</style>
+<script src="fx.js" defer></script>
+</head>
+<body>
+<div id="game">
+  <div class="cloud" style="top:8%;width:80px;height:30px"></div>
+  <div class="cloud" style="top:14%;right:15%;width:100px;height:34px"></div>
+  <div class="cloud" style="top:20%;left:30%;width:60px;height:24px"></div>
+  <div class="ground"></div>
+  <div id="hud">
+    <div class="brand">
+      <div class="brand-name">LES SCHWAB</div>
+      <div class="brand-sub">TIRE CENTERS</div>
+    </div>
+    <div class="score-box">
+      <div class="score-lbl">DISTANCE</div>
+      <div class="score-val" id="score">0</div>
+    </div>
+  </div>
+  <div class="instr" id="instr">TAP TO JUMP</div>
+  <div id="tire"></div>
+  <div class="power-ring" id="ring"></div>
+
+  <div class="screen" id="start">
+    <div class="panel">
+      <!-- LOGO SLOT: Replace with <img src="../assets/logos/lesschwab.png"> -->
+      <div class="logo-slot">🛞</div>
+      <div class="tag">LES SCHWAB TIRES</div>
+      <h1 class="title">Tire <em>Roll</em></h1>
+      <p class="desc">Tap to bounce the tire over potholes and cones. Keep rolling as long as you can! Reach <b>500 meters</b> to unlock a free tire rotation reward.</p>
+      <button class="btn" onclick="start()">START ROLLING</button>
+    </div>
+  </div>
+
+  <div class="screen hidden" id="over">
+    <div class="panel">
+      <div class="final-lbl">DISTANCE ROLLED</div>
+      <div class="final-score" id="finalScore">0m</div>
+      <div id="rewardArea"></div>
+      <button class="btn" onclick="start()">ROLL AGAIN</button>
+      <button class="btn outline" onclick="share()">Share</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const COMPANY='Les Schwab Tires',GAME='Tire Roll',TARGET=500,COUPON='ROLL-LS';
+const game=document.getElementById('game'),tire=document.getElementById('tire'),scoreEl=document.getElementById('score'),ring=document.getElementById('ring'),instrEl=document.getElementById('instr');
+let W,H,running,tireY,vy,onGround,tireX,rot,obstacles=[],spawnT,speed,dist,lastT,raf;
+const GROUND_Y=100,TIRE_SIZE=70;
+function resize(){W=innerWidth;H=innerHeight}
+addEventListener('resize',resize);resize();
+function jump(){
+  if(!running)return;
+  if(onGround){vy=-14;onGround=false;PAfx.play('bounce');ring.classList.remove('active');void ring.offsetWidth;ring.classList.add('active')}
+  instrEl.style.opacity=0;
+}
+game.addEventListener('click',jump);
+addEventListener('keydown',e=>{if(e.key===' '||e.key==='ArrowUp'){e.preventDefault();jump()}});
+const OBS=[{w:30,h:50,t:'CONE'},{w:50,h:30,t:'HOLE'},{w:40,h:40,t:'ROCK'}];
+function spawn(){
+  const k=OBS[Math.floor(Math.random()*OBS.length)];
+  const o=document.createElement('div');o.className='obstacle';
+  o.style.width=k.w+'px';o.style.height=k.h+'px';
+  o.textContent=k.t;
+  o.x=W+40;o.w=k.w;o.h=k.h;
+  o.style.left=o.x+'px';
+  game.appendChild(o);obstacles.push(o);
+}
+function loop(t){
+  if(!running)return;
+  const dt=Math.min(32,t-lastT);lastT=t;
+  const step=dt/16;
+  speed=Math.min(12,speed+.003);
+  dist+=speed*step*.8;scoreEl.textContent=Math.floor(dist)+'m';
+  // tire physics
+  vy+=.8*step;tireY+=vy*step;
+  if(tireY>=0){tireY=0;vy=0;onGround=true}
+  rot+=speed*4*step;
+  tire.style.left=(tireX-TIRE_SIZE/2)+'px';
+  tire.style.top=(H-GROUND_Y-TIRE_SIZE+tireY)+'px';
+  tire.style.transform=`rotate(${rot}deg)`;
+  // obstacles
+  spawnT+=dt;if(spawnT>Math.max(900-speed*40,500)){spawnT=0;spawn()}
+  for(let i=obstacles.length-1;i>=0;i--){
+    const o=obstacles[i];o.x-=speed*step;o.style.left=o.x+'px';
+    const tireCx=tireX,tireCy=H-GROUND_Y-TIRE_SIZE/2+tireY;
+    const obsRect={l:o.x,r:o.x+o.w,t:H-GROUND_Y-o.h,b:H-GROUND_Y};
+    if(tireCx+TIRE_SIZE/2>obsRect.l&&tireCx-TIRE_SIZE/2<obsRect.r&&tireCy+TIRE_SIZE/2>obsRect.t){
+      PAfx.play('thud');PAfx.shake(600,10);PAfx.flash('#C8102E',250);PAfx.burst(o.x+o.w/2,H-GROUND_Y-o.h/2,'#C8102E',14);
+      end();return;
+    }
+    if(o.x<-60){o.remove();obstacles.splice(i,1)}
+  }
+  raf=requestAnimationFrame(loop);
+}
+function start(){
+  document.getElementById('start').classList.add('hidden');
+  document.getElementById('over').classList.add('hidden');
+  obstacles.forEach(o=>o.remove());obstacles=[];
+  dist=0;scoreEl.textContent='0m';running=true;
+  tireX=W*.25;tireY=0;vy=0;onGround=true;rot=0;
+  speed=6;spawnT=0;lastT=performance.now();instrEl.style.opacity=1;
+  PAfx.play('start');
+  raf=requestAnimationFrame(loop);
+}
+function end(){
+  running=false;cancelAnimationFrame(raf);
+  const meters=Math.floor(dist);
+  document.getElementById('finalScore').textContent=meters+'m';
+  const r=document.getElementById('rewardArea');
+  if(meters>=TARGET){
+    PAfx.play('win');
+    setTimeout(()=>PAfx.burst(innerWidth/2,innerHeight/2,'#C8102E',24),150);
+    r.innerHTML=`<div class="coupon"><div class="coupon-title">🛞 REWARD UNLOCKED</div><div class="coupon-code">${COUPON}</div><div class="coupon-sub">FREE TIRE ROTATION · PRESENT AT STORE</div></div>`;
+  }else{
+    PAfx.play('gameover');
+    r.innerHTML=`<p style="font-size:13px;color:var(--gray);margin-bottom:16px;">Roll <b>${TARGET}m</b> to unlock the reward!</p>`;
+  }
+  document.getElementById('over').classList.remove('hidden');
+}
+function share(){
+  const txt=`I rolled ${Math.floor(dist)}m in ${GAME} by ${COMPANY}! 🛞`;
+  if(navigator.share)navigator.share({title:GAME,text:txt,url:location.href}).catch(()=>{});
+  else{navigator.clipboard?.writeText(txt+' '+location.href);alert('Copied!')}
+}
+</script>
+</body>
+</html>

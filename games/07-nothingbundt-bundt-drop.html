@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>Bundt Drop — Nothing Bundt Cakes</title>
+<meta name="description" content="Time it right and drop the perfect bundt. Hit enough perfects to unlock a sweet reward!"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@400;500;700&display=swap" rel="stylesheet"/>
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  :root{--pink:#F4B6C2;--pink-dark:#D48BA1;--brown:#4A2C2A;--cream:#FFF9F3;--gold:#C49A5F}
+  html,body{height:100%;overflow:hidden;background:var(--pink);font-family:'Inter',sans-serif;user-select:none;-webkit-user-select:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+  #game{position:fixed;inset:0;overflow:hidden;background:linear-gradient(180deg,#FCE4EC 0%,#F4B6C2 100%);cursor:pointer}
+  #hud{position:absolute;top:0;left:0;right:0;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;z-index:5;pointer-events:none}
+  .brand{background:var(--cream);padding:8px 18px;border-radius:30px;border:2px solid var(--brown);box-shadow:0 3px 10px rgba(74,44,42,.2)}
+  .brand-name{font-family:'Playfair Display';font-size:14px;color:var(--brown);line-height:1;font-weight:800;letter-spacing:.5px}
+  .brand-sub{font-size:9px;color:var(--pink-dark);font-weight:700;letter-spacing:2px;margin-top:2px}
+  .score-box{background:var(--brown);color:var(--cream);padding:8px 18px;border-radius:30px;text-align:right}
+  .score-lbl{font-size:9px;letter-spacing:2px;opacity:.7;line-height:1}
+  .score-val{font-family:'Playfair Display';font-size:24px;font-weight:800;line-height:1.1;color:var(--gold)}
+  #plate{position:absolute;bottom:50px;left:50%;transform:translateX(-50%);width:240px;height:20px;background:radial-gradient(ellipse,#fff 30%,#E8D8C8 100%);border-radius:50%;box-shadow:0 8px 20px rgba(74,44,42,.3);z-index:2}
+  .target-zone{position:absolute;bottom:70px;left:50%;transform:translateX(-50%);width:120px;height:6px;background:linear-gradient(90deg,transparent,var(--gold),transparent);border-radius:3px;z-index:1}
+  .target-zone::before{content:'PERFECT';position:absolute;bottom:10px;left:50%;transform:translateX(-50%);font-family:'Playfair Display';font-size:10px;letter-spacing:3px;color:var(--gold);font-weight:800}
+  #swinger{position:absolute;top:100px;left:0;right:0;height:60px;display:flex;justify-content:center;will-change:transform}
+  #swinger::before{content:'';position:absolute;top:0;left:50%;width:2px;height:30px;background:rgba(74,44,42,.3)}
+  .bundt{position:absolute;top:25px;font-size:50px;filter:drop-shadow(0 6px 10px rgba(74,44,42,.3));will-change:left}
+  .instr{position:absolute;top:170px;left:0;right:0;text-align:center;color:var(--brown);font-family:'Playfair Display';font-size:12px;letter-spacing:3px;font-weight:700;z-index:2;opacity:.7}
+  .verdict{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'Playfair Display';font-size:60px;font-weight:800;pointer-events:none;animation:verdict 1s forwards;z-index:10}
+  @keyframes verdict{0%{transform:translate(-50%,-50%) scale(.5);opacity:0}20%{transform:translate(-50%,-50%) scale(1.1);opacity:1}80%{opacity:1}100%{transform:translate(-50%,-80%) scale(1);opacity:0}}
+  .v-perfect{color:var(--gold);text-shadow:0 4px 10px rgba(196,154,95,.6)}
+  .v-good{color:var(--pink-dark)}
+  .v-miss{color:var(--brown);opacity:.5}
+  .dropped{position:absolute;font-size:40px;pointer-events:none;will-change:transform,top}
+  .screen{position:absolute;inset:0;background:rgba(212,139,161,.94);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;z-index:20;padding:20px}
+  .screen.hidden{display:none}
+  .panel{background:var(--cream);border-radius:16px;padding:32px 28px;max-width:360px;width:100%;text-align:center;box-shadow:0 16px 40px rgba(74,44,42,.3);border:2px solid var(--brown)}
+  .tag{font-family:'Playfair Display';font-size:11px;letter-spacing:4px;color:var(--pink-dark);font-weight:700;text-transform:uppercase}
+  .title{font-family:'Playfair Display';font-size:42px;color:var(--brown);line-height:1;margin:8px 0;font-weight:800}
+  .title em{font-style:italic;color:var(--gold)}
+  .desc{font-size:14px;color:#7A5E5C;line-height:1.5;margin-bottom:22px}
+  .btn{background:var(--brown);color:var(--cream);border:none;padding:14px 40px;border-radius:30px;font-family:'Playfair Display';font-size:16px;font-weight:700;letter-spacing:1px;cursor:pointer;box-shadow:0 4px 14px rgba(74,44,42,.3);transition:transform .1s}
+  .btn:active{transform:scale(.95)}
+  .btn.outline{background:transparent;color:var(--brown);border:2px solid var(--brown);box-shadow:none;margin-top:10px;padding:10px 28px;font-size:13px}
+  .final-score{font-family:'Playfair Display';font-size:72px;color:var(--gold);line-height:1;font-weight:800}
+  .final-lbl{font-size:11px;letter-spacing:3px;color:var(--pink-dark);font-weight:700;margin:8px 0}
+  .breakdown{font-size:13px;color:var(--brown);margin-bottom:14px;font-weight:600}
+  .coupon{background:linear-gradient(135deg,#FFF4D6,var(--gold));border:2px dashed var(--brown);border-radius:12px;padding:16px;margin-bottom:16px}
+  .coupon-title{font-family:'Playfair Display';font-size:12px;letter-spacing:2px;color:var(--brown);font-weight:800;margin-bottom:6px;text-transform:uppercase}
+  .coupon-code{font-family:'Playfair Display';font-size:24px;color:var(--brown);letter-spacing:3px;font-weight:800}
+  .coupon-sub{font-size:11px;color:var(--brown);margin-top:4px;font-weight:700}
+  .logo-slot{width:72px;height:72px;background:var(--pink);border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:40px;border:2px solid var(--brown)}
+</style>
+<script src="fx.js" defer></script>
+</head>
+<body>
+<div id="game">
+  <div id="hud">
+    <div class="brand">
+      <div class="brand-name">Nothing Bundt</div>
+      <div class="brand-sub">CAKES</div>
+    </div>
+    <div class="score-box">
+      <div class="score-lbl">POINTS</div>
+      <div class="score-val" id="score">0</div>
+    </div>
+  </div>
+  <div id="swinger"><div class="bundt" id="bundt">🎂</div></div>
+  <div class="instr">TAP WHEN OVER THE PLATE</div>
+  <div class="target-zone"></div>
+  <div id="plate"></div>
+
+  <div class="screen" id="start">
+    <div class="panel">
+      <!-- LOGO SLOT: Replace with <img src="../assets/logos/nothingbundt.png"> -->
+      <div class="logo-slot">🎂</div>
+      <div class="tag">NOTHING BUNDT CAKES</div>
+      <h1 class="title">Bundt <em>Drop</em></h1>
+      <p class="desc">The bundt swings back and forth. Tap to drop it — land on the plate for points, hit the perfect zone for bonus! <b>10 drops</b>. Score <b>60+</b> to unlock a sweet reward.</p>
+      <button class="btn" onclick="start()">START DROPPING</button>
+    </div>
+  </div>
+
+  <div class="screen hidden" id="over">
+    <div class="panel">
+      <div class="final-lbl">YOUR SCORE</div>
+      <div class="final-score" id="finalScore">0</div>
+      <div class="breakdown" id="breakdown"></div>
+      <div id="rewardArea"></div>
+      <button class="btn" onclick="start()">Drop Again</button>
+      <button class="btn outline" onclick="share()">Share</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const COMPANY='Nothing Bundt Cakes',GAME='Bundt Drop',TARGET=60,COUPON='BUNDT5',MAX_DROPS=10;
+const bundt=document.getElementById('bundt'),scoreEl=document.getElementById('score'),game=document.getElementById('game');
+let W,H,score,running,time,dropsLeft,perfects,goods,misses,plate,target,speed;
+function resize(){W=innerWidth;H=innerHeight;plate={x:W/2-120,w:240};target={x:W/2-60,w:120}}
+addEventListener('resize',resize);resize();
+function loop(t){
+  if(!running)return;
+  time+=speed;
+  const x=W/2+Math.sin(time)*((W/2)-80);
+  bundt.style.left=(x-25)+'px';
+  requestAnimationFrame(loop);
+}
+function drop(){
+  if(!running||dropsLeft<=0)return;
+  PAfx.play('whoosh');
+  const x=parseFloat(bundt.style.left)+25;
+  const el=document.createElement('div');el.className='dropped';el.textContent='🎂';
+  el.style.left=(x-20)+'px';el.style.top='130px';
+  game.appendChild(el);
+  let y=130;const startY=130,endY=H-85;const dur=500;const s=performance.now();
+  function fall(t){
+    const p=Math.min(1,(t-s)/dur);
+    y=startY+(endY-startY)*p;
+    el.style.transform=`translateY(${y-130}px) rotate(${p*360}deg)`;
+    if(p<1)requestAnimationFrame(fall);
+    else judge(x,el);
+  }
+  requestAnimationFrame(fall);
+  dropsLeft--;
+}
+function judge(x,el){
+  let v,pts;
+  if(x>=target.x&&x<=target.x+target.w){v='PERFECT!';pts=12;perfects++;PAfx.play('powerup');PAfx.burst(x,H-85,'#F4B6C2',18);PAfx.shake(150,3)}
+  else if(x>=plate.x&&x<=plate.x+plate.w){v='GOOD';pts=6;goods++;PAfx.play('score');PAfx.burst(x,H-85,'#FCE4EC',10)}
+  else{v='MISS';pts=0;misses++;PAfx.play('miss');PAfx.shake(200,4)}
+  score+=pts;scoreEl.textContent=score;
+  const vd=document.createElement('div');vd.className='verdict '+(pts===12?'v-perfect':pts===6?'v-good':'v-miss');
+  vd.textContent=v;game.appendChild(vd);setTimeout(()=>vd.remove(),1000);
+  setTimeout(()=>el.remove(),400);
+  if(dropsLeft<=0)setTimeout(end,900);
+  else speed=Math.min(.09,speed+.003);
+}
+game.addEventListener('click',drop);
+function start(){
+  document.getElementById('start').classList.add('hidden');
+  document.getElementById('over').classList.add('hidden');
+  document.querySelectorAll('.dropped,.verdict').forEach(e=>e.remove());
+  score=0;scoreEl.textContent=0;time=0;dropsLeft=MAX_DROPS;perfects=0;goods=0;misses=0;speed=.04;
+  running=true;PAfx.play('start');requestAnimationFrame(loop);
+}
+function end(){
+  running=false;
+  document.getElementById('finalScore').textContent=score;
+  document.getElementById('breakdown').textContent=`${perfects} Perfect · ${goods} Good · ${misses} Miss`;
+  const r=document.getElementById('rewardArea');
+  if(score>=TARGET){
+    PAfx.play('win');
+    setTimeout(()=>PAfx.burst(innerWidth/2,innerHeight/2,'#F4B6C2',24),150);
+    r.innerHTML=`<div class="coupon"><div class="coupon-title">🎂 Sweet Reward Unlocked</div><div class="coupon-code">${COUPON}</div><div class="coupon-sub">$5 OFF ANY 10" BUNDT CAKE</div></div>`;
+  }else{
+    PAfx.play('gameover');
+    r.innerHTML=`<p style="font-size:13px;color:#7A5E5C;margin-bottom:16px;">Score <b>${TARGET}+</b> to unlock the reward!</p>`;
+  }
+  document.getElementById('over').classList.remove('hidden');
+}
+function share(){
+  const txt=`I scored ${score} in ${GAME} by ${COMPANY}! 🎂`;
+  if(navigator.share)navigator.share({title:GAME,text:txt,url:location.href}).catch(()=>{});
+  else{navigator.clipboard?.writeText(txt+' '+location.href);alert('Copied!')}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>Shack Stack — Shake Shack</title>
+<meta name="description" content="Stack the perfect burger in this Shake Shack mini-game. How tall can you stack it?"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Inter:wght@500;700&display=swap" rel="stylesheet"/>
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  :root{--green:#00A968;--dark-green:#005C3F;--cream:#F4EFE0;--yellow:#FFD84A;--brown:#6B3E24}
+  html,body{height:100%;overflow:hidden;background:var(--green);font-family:'Inter',sans-serif;user-select:none;-webkit-user-select:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+  #game{position:fixed;inset:0;overflow:hidden;background:linear-gradient(180deg,#A7E8C4 0%,#00A968 70%,#005C3F 100%);cursor:pointer}
+  #hud{position:absolute;top:0;left:0;right:0;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;z-index:5;pointer-events:none}
+  .brand{background:var(--cream);padding:8px 18px;border-radius:50px;box-shadow:0 4px 12px rgba(0,92,63,.3)}
+  .brand-name{font-family:'Bowlby One';font-size:16px;color:var(--dark-green);line-height:1;letter-spacing:1px}
+  .brand-sub{font-size:9px;color:var(--green);font-weight:700;letter-spacing:2px;margin-top:2px}
+  .score-box{text-align:right;color:#fff}
+  .score-lbl{font-size:10px;letter-spacing:2px;font-weight:700;opacity:.8}
+  .score-val{font-family:'Bowlby One';font-size:30px;line-height:1;text-shadow:0 2px 8px rgba(0,0,0,.3)}
+  .moving-piece,.stacked-piece{position:absolute;will-change:left,top,transform;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:rgba(255,255,255,.9);text-shadow:0 1px 2px rgba(0,0,0,.3)}
+  .plate{position:absolute;left:50%;bottom:30px;transform:translateX(-50%);width:200px;height:16px;background:radial-gradient(ellipse,#fff 30%,#D8D0B8 100%);border-radius:50%;box-shadow:0 6px 16px rgba(0,0,0,.3);z-index:1}
+  .instruction{position:absolute;top:70px;left:0;right:0;text-align:center;color:#fff;font-size:12px;letter-spacing:2px;font-weight:700;opacity:.8;z-index:4;text-transform:uppercase}
+  .screen{position:absolute;inset:0;background:rgba(0,92,63,.94);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;z-index:20;padding:20px}
+  .screen.hidden{display:none}
+  .panel{background:var(--cream);border-radius:20px;padding:32px 28px;max-width:360px;width:100%;text-align:center;box-shadow:0 16px 40px rgba(0,0,0,.4)}
+  .tag{font-size:11px;letter-spacing:4px;color:var(--green);font-weight:700;text-transform:uppercase}
+  .title{font-family:'Bowlby One';font-size:40px;color:var(--dark-green);line-height:1;margin:6px 0 8px}
+  .title em{font-style:normal;color:var(--yellow);text-shadow:2px 2px 0 var(--dark-green)}
+  .desc{font-size:14px;color:#5C5243;line-height:1.5;margin-bottom:22px}
+  .btn{background:var(--green);color:#fff;border:none;padding:14px 40px;border-radius:40px;font-family:'Bowlby One';font-size:18px;letter-spacing:1px;cursor:pointer;box-shadow:0 5px 0 var(--dark-green),0 6px 20px rgba(0,168,104,.4);transition:all .1s}
+  .btn:active{transform:translateY(3px);box-shadow:0 2px 0 var(--dark-green)}
+  .btn.outline{background:transparent;color:var(--green);border:2px solid var(--green);box-shadow:none;margin-top:10px;padding:10px 28px;font-size:13px}
+  .final-score{font-family:'Bowlby One';font-size:80px;color:var(--green);line-height:1}
+  .final-lbl{font-size:11px;letter-spacing:3px;color:#8A7F6B;font-weight:700;margin:8px 0}
+  .logo-slot{width:72px;height:72px;background:var(--green);border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:40px;color:#fff;box-shadow:0 6px 16px rgba(0,168,104,.4)}
+  .rank{font-size:14px;color:var(--green);font-weight:700;margin-bottom:14px}
+</style>
+<script src="fx.js" defer></script>
+</head>
+<body>
+<div id="game">
+  <div id="hud">
+    <div class="brand">
+      <div class="brand-name">SHAKE SHACK</div>
+      <div class="brand-sub">SINCE 2004</div>
+    </div>
+    <div class="score-box">
+      <div class="score-lbl">STACKED</div>
+      <div class="score-val" id="score">0</div>
+    </div>
+  </div>
+  <div class="instruction" id="instruction">TAP TO DROP</div>
+  <div class="plate"></div>
+
+  <div class="screen" id="start">
+    <div class="panel">
+      <!-- LOGO SLOT: Replace with <img src="../assets/logos/shakeshack.png"> -->
+      <div class="logo-slot">🍔</div>
+      <div class="tag">SHAKE SHACK</div>
+      <h1 class="title">Shack <em>Stack</em></h1>
+      <p class="desc">Tap to drop each ingredient. Line it up perfectly — every miss shrinks the next piece. How tall can you stack?</p>
+      <button class="btn" onclick="start()">START STACKING</button>
+    </div>
+  </div>
+
+  <div class="screen hidden" id="over">
+    <div class="panel">
+      <div class="final-lbl">BURGER HEIGHT</div>
+      <div class="final-score" id="finalScore">0</div>
+      <div class="rank" id="rankMsg"></div>
+      <button class="btn" onclick="start()">STACK AGAIN</button>
+      <button class="btn outline" onclick="share()">Share</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const COMPANY='Shake Shack',GAME='Shack Stack';
+const game=document.getElementById('game'),scoreEl=document.getElementById('score');
+const LAYERS=[
+  {name:'BUN',color:'#E8B56C',h:32},
+  {name:'PATTY',color:'#6B3E24',h:22},
+  {name:'CHEESE',color:'#FFCB3C',h:14},
+  {name:'LETTUCE',color:'#4CAF50',h:16},
+  {name:'TOMATO',color:'#E53935',h:16},
+  {name:'PICKLE',color:'#8BC34A',h:10},
+  {name:'ONION',color:'#F4E4D4',h:12},
+  {name:'SAUCE',color:'#E91E63',h:8},
+  {name:'BACON',color:'#A0522D',h:10},
+];
+let W,H,score,running,stack,moving,dir,topY;
+function resize(){W=innerWidth;H=innerHeight}
+addEventListener('resize',resize);resize();
+function nextLayer(){
+  const layer=LAYERS[score%LAYERS.length];
+  const prev=stack[stack.length-1];
+  const w=prev?prev.w:180;
+  const el=document.createElement('div');el.className='moving-piece';
+  el.style.width=w+'px';el.style.height=layer.h+'px';
+  el.style.background=layer.color;el.style.borderRadius=score===0?'40px 40px 8px 8px':'4px';
+  el.style.top=(topY-layer.h-4)+'px';
+  el.textContent=layer.name;el.style.boxShadow='0 3px 0 rgba(0,0,0,.2)';
+  moving={el,w,h:layer.h,x:0,speed:3+score*.12,color:layer.color,name:layer.name};
+  dir=1;moving.x=0;el.style.left='0px';
+  game.appendChild(el);
+}
+function loop(){
+  if(!running)return;
+  moving.x+=moving.speed*dir;
+  if(moving.x<=0){moving.x=0;dir=1}
+  if(moving.x>=W-moving.w){moving.x=W-moving.w;dir=-1}
+  moving.el.style.left=moving.x+'px';
+  requestAnimationFrame(loop);
+}
+function drop(){
+  if(!running||!moving)return;
+  const prev=stack[stack.length-1];
+  let newX=moving.x,newW=moving.w;
+  if(prev){
+    const overlapL=Math.max(moving.x,prev.x);
+    const overlapR=Math.min(moving.x+moving.w,prev.x+prev.w);
+    const overlap=overlapR-overlapL;
+    if(overlap<=8){PAfx.play('splat');PAfx.shake(400,8);PAfx.burst(moving.x+moving.w/2,topY,'#E91E63',14);end();return}
+    const perfect=Math.abs(moving.x-prev.x)<4;
+    if(perfect){PAfx.play('powerup');PAfx.popup(moving.x+moving.w/2,topY-20,'PERFECT!','#FFCB3C');PAfx.burst(moving.x+moving.w/2,topY,'#FFCB3C',12);newX=prev.x;newW=prev.w}
+    else{PAfx.play('thud');PAfx.burst(moving.x+moving.w/2,topY,moving.color,6);newX=overlapL;newW=overlap}
+  }else{PAfx.play('thud');}
+  moving.el.className='stacked-piece';
+  moving.el.style.left=newX+'px';
+  moving.el.style.width=newW+'px';
+  topY-=(moving.h+4);
+  stack.push({x:newX,w:newW,h:moving.h});
+  score++;scoreEl.textContent=score;
+  // slide stack down if getting tall
+  if(topY<180){
+    const shift=180-topY;topY=180;
+    document.querySelectorAll('.stacked-piece').forEach(p=>{
+      p.style.top=(parseFloat(p.style.top)+shift)+'px';
+    });
+  }
+  nextLayer();requestAnimationFrame(loop);
+}
+game.addEventListener('click',drop);
+function start(){
+  document.getElementById('start').classList.add('hidden');
+  document.getElementById('over').classList.add('hidden');
+  document.querySelectorAll('.moving-piece,.stacked-piece').forEach(p=>p.remove());
+  score=0;scoreEl.textContent=0;stack=[];running=true;
+  topY=H-46;
+  PAfx.play('start');
+  nextLayer();requestAnimationFrame(loop);
+}
+function end(){
+  running=false;
+  PAfx.play(score>=10?'win':'gameover');
+  document.getElementById('finalScore').textContent=score;
+  const msg=score>=15?'🏆 SHACK LEGEND':score>=10?'🍔 BURGER BOSS':score>=5?'👍 NICE STACK':'🥲 TRY AGAIN!';
+  document.getElementById('rankMsg').textContent=msg;
+  document.getElementById('over').classList.remove('hidden');
+}
+function share(){
+  const txt=`I stacked ${score} layers in ${GAME} by ${COMPANY}! 🍔`;
+  if(navigator.share)navigator.share({title:GAME,text:txt,url:location.href}).catch(()=>{});
+  else{navigator.clipboard?.writeText(txt+' '+location.href);alert('Copied!')}
+}
+</script>
+</body>
+</html>

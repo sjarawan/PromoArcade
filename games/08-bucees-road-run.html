@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>Road Run — Buc-ee's</title>
+<meta name="description" content="Dodge traffic and race to the next Buc-ee's! A lane-switching road trip mini-game."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Rubik+Mono+One&family=Inter:wght@500;700&display=swap" rel="stylesheet"/>
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  :root{--yellow:#FFDE2D;--red:#C8161D;--black:#1A1A1A;--road:#3A3A3A;--white:#FFF}
+  html,body{height:100%;overflow:hidden;background:var(--yellow);font-family:'Inter',sans-serif;user-select:none;-webkit-user-select:none;touch-action:none;-webkit-tap-highlight-color:transparent}
+  #game{position:fixed;inset:0;overflow:hidden;background:linear-gradient(180deg,#87CEEB 0%,#B8E0F2 40%,#C4A57E 60%,#8B7350 100%)}
+  #road{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:280px;max-width:85%;height:100%;background:var(--road);overflow:hidden;box-shadow:0 0 30px rgba(0,0,0,.3)}
+  .lane-line{position:absolute;top:0;width:4px;height:200%;background:repeating-linear-gradient(0deg,var(--yellow) 0 24px,transparent 24px 44px);will-change:transform}
+  .ll1{left:33.3%}.ll2{left:66.6%}
+  #hud{position:absolute;top:0;left:0;right:0;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;z-index:5;pointer-events:none}
+  .brand{background:var(--red);padding:8px 16px;border-radius:6px;border:3px solid var(--black);box-shadow:3px 3px 0 var(--black)}
+  .brand-name{font-family:'Rubik Mono One';font-size:14px;color:var(--yellow);line-height:1}
+  .brand-sub{font-size:9px;color:#fff;font-weight:700;letter-spacing:2px;margin-top:2px}
+  .score-box{background:var(--black);color:var(--yellow);padding:8px 18px;border-radius:6px;text-align:right;border:3px solid var(--red);box-shadow:-3px 3px 0 var(--red)}
+  .score-lbl{font-size:10px;letter-spacing:2px;line-height:1}
+  .score-val{font-family:'Rubik Mono One';font-size:22px;line-height:1.1}
+  #car{position:absolute;bottom:60px;width:50px;height:80px;display:flex;align-items:center;justify-content:center;font-size:52px;transition:left .15s ease-out;will-change:left;filter:drop-shadow(0 4px 8px rgba(0,0,0,.4));z-index:3}
+  .obstacle{position:absolute;width:50px;height:70px;display:flex;align-items:center;justify-content:center;font-size:44px;will-change:transform;filter:drop-shadow(0 3px 6px rgba(0,0,0,.4))}
+  .obstacle.pickup{filter:drop-shadow(0 0 12px rgba(255,222,45,.8))}
+  .controls{position:absolute;bottom:20px;left:0;right:0;display:flex;justify-content:space-between;padding:0 16px;z-index:4}
+  .ctrl{flex:1;max-width:120px;background:rgba(26,26,26,.7);color:var(--yellow);border:2px solid var(--yellow);padding:16px 0;border-radius:12px;font-family:'Rubik Mono One';font-size:22px;cursor:pointer;backdrop-filter:blur(4px);user-select:none;touch-action:manipulation}
+  .ctrl:active{background:var(--yellow);color:var(--black)}
+  .screen{position:absolute;inset:0;background:rgba(255,222,45,.95);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;z-index:20;padding:20px}
+  .screen.hidden{display:none}
+  .panel{background:var(--white);border:4px solid var(--black);border-radius:12px;padding:32px 28px;max-width:360px;width:100%;text-align:center;box-shadow:6px 6px 0 var(--red)}
+  .tag{font-family:'Rubik Mono One';font-size:11px;letter-spacing:3px;color:var(--red)}
+  .title{font-family:'Rubik Mono One';font-size:40px;color:var(--black);line-height:1;margin:8px 0}
+  .title em{font-style:normal;color:var(--red)}
+  .desc{font-size:14px;color:#3A3A3A;line-height:1.5;margin-bottom:22px}
+  .btn{background:var(--red);color:var(--yellow);border:3px solid var(--black);padding:14px 40px;font-family:'Rubik Mono One';font-size:16px;letter-spacing:1px;cursor:pointer;border-radius:6px;box-shadow:4px 4px 0 var(--black);transition:all .1s}
+  .btn:active{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--black)}
+  .btn.outline{background:transparent;color:var(--black);margin-top:10px;padding:10px 28px;font-size:13px;box-shadow:2px 2px 0 var(--red)}
+  .final-score{font-family:'Rubik Mono One';font-size:68px;color:var(--red);line-height:1}
+  .final-lbl{font-family:'Rubik Mono One';font-size:11px;letter-spacing:3px;color:var(--black);margin:8px 0}
+  .logo-slot{width:80px;height:80px;background:var(--yellow);border:4px solid var(--black);border-radius:12px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:44px}
+  .stars{font-size:14px;color:var(--red);font-weight:700;margin-bottom:14px}
+</style>
+<script src="fx.js" defer></script>
+</head>
+<body>
+<div id="game">
+  <div id="road">
+    <div class="lane-line ll1" id="ll1"></div>
+    <div class="lane-line ll2" id="ll2"></div>
+  </div>
+  <div id="hud">
+    <div class="brand">
+      <div class="brand-name">BUC-EE'S</div>
+      <div class="brand-sub">HOME OF THE BEAVER</div>
+    </div>
+    <div class="score-box">
+      <div class="score-lbl">MILES</div>
+      <div class="score-val" id="score">0</div>
+    </div>
+  </div>
+  <div id="car">🚗</div>
+  <div class="controls">
+    <button class="ctrl" id="leftBtn">◀</button>
+    <button class="ctrl" id="rightBtn">▶</button>
+  </div>
+
+  <div class="screen" id="start">
+    <div class="panel">
+      <!-- LOGO SLOT: Replace with <img src="../assets/logos/bucees.png"> -->
+      <div class="logo-slot">🦫</div>
+      <div class="tag">BUC-EE'S ROAD TRIP</div>
+      <h1 class="title">Road <em>Run</em></h1>
+      <p class="desc">You're driving to the next Buc-ee's! Switch lanes to dodge obstacles and grab Beaver Nuggets for bonus miles. How far can you go?</p>
+      <button class="btn" onclick="start()">HIT THE ROAD</button>
+    </div>
+  </div>
+
+  <div class="screen hidden" id="over">
+    <div class="panel">
+      <div class="final-lbl">MILES DRIVEN</div>
+      <div class="final-score" id="finalScore">0</div>
+      <div class="stars" id="stars"></div>
+      <button class="btn" onclick="start()">DRIVE AGAIN</button>
+      <button class="btn outline" onclick="share()">Share</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const COMPANY="Buc-ee's",GAME='Road Run';
+const game=document.getElementById('game'),car=document.getElementById('car'),scoreEl=document.getElementById('score');
+const road=document.getElementById('road'),ll1=document.getElementById('ll1'),ll2=document.getElementById('ll2');
+let W,H,roadRect,lane,running,score,obstacles=[],spawnT,speed,lineOff,lastT,raf;
+function resize(){
+  W=innerWidth;H=innerHeight;roadRect=road.getBoundingClientRect();
+  setLane(lane||1);
+}
+addEventListener('resize',resize);resize();
+function setLane(i){
+  lane=i;
+  const laneW=roadRect.width/3;
+  const cx=roadRect.left+laneW*(i+.5);
+  car.style.left=(cx-25)+'px';
+}
+function left(){if(running&&lane>0){setLane(lane-1);PAfx.play('click')}}
+function right(){if(running&&lane<2){setLane(lane+1);PAfx.play('click')}}
+document.getElementById('leftBtn').addEventListener('pointerdown',e=>{e.preventDefault();left()});
+document.getElementById('rightBtn').addEventListener('pointerdown',e=>{e.preventDefault();right()});
+addEventListener('keydown',e=>{if(e.key==='ArrowLeft')left();if(e.key==='ArrowRight')right()});
+let touchStart=null;
+addEventListener('touchstart',e=>{if(running&&e.touches[0])touchStart=e.touches[0].clientX});
+addEventListener('touchend',e=>{
+  if(touchStart===null||!e.changedTouches[0])return;
+  const dx=e.changedTouches[0].clientX-touchStart;
+  if(dx>30)right();else if(dx<-30)left();
+  touchStart=null;
+});
+const OBS=['🚙','🚚','🛻','🏍️'];
+function spawn(){
+  const pickup=Math.random()<.25;
+  const o=document.createElement('div');o.className='obstacle'+(pickup?' pickup':'');
+  o.textContent=pickup?'🥜':OBS[Math.floor(Math.random()*OBS.length)];
+  o.lane=Math.floor(Math.random()*3);o.y=-80;o.pickup=pickup;
+  const laneW=roadRect.width/3;
+  o.style.left=(roadRect.left+laneW*(o.lane+.5)-25)+'px';
+  o.style.transform=`translateY(${o.y}px)`;game.appendChild(o);obstacles.push(o);
+}
+function loop(t){
+  if(!running)return;
+  const dt=Math.min(32,t-lastT);lastT=t;
+  speed=Math.min(14,speed+.002);
+  lineOff=(lineOff+speed*(dt/16))%44;
+  ll1.style.transform=`translateY(${lineOff}px)`;ll2.style.transform=`translateY(${lineOff}px)`;
+  spawnT+=dt;if(spawnT>Math.max(700-speed*30,260)){spawnT=0;spawn()}
+  const carY=H-140;
+  for(let i=obstacles.length-1;i>=0;i--){
+    const o=obstacles[i];o.y+=speed*(dt/16);
+    o.style.transform=`translateY(${o.y}px)`;
+    if(o.y>carY-30&&o.y<carY+60&&o.lane===lane){
+      if(o.pickup){score+=5;scoreEl.textContent=score;PAfx.play('coin');PAfx.burst(parseFloat(o.style.left)+25,o.y,'#FFDE2D',12);PAfx.popup(parseFloat(o.style.left)+25,o.y,'+5','#FFDE2D');o.remove();obstacles.splice(i,1)}
+      else{PAfx.play('thud');PAfx.shake(600,10);PAfx.flash('#fff',200);PAfx.burst(parseFloat(o.style.left)+25,o.y,'#F5C800',16);end();return}
+    }else if(o.y>H+80){o.remove();obstacles.splice(i,1);score++;scoreEl.textContent=score}
+  }
+  raf=requestAnimationFrame(loop);
+}
+function start(){
+  document.getElementById('start').classList.add('hidden');
+  document.getElementById('over').classList.add('hidden');
+  obstacles.forEach(o=>o.remove());obstacles=[];
+  score=0;scoreEl.textContent=0;lane=1;setLane(1);running=true;
+  spawnT=0;speed=5;lineOff=0;lastT=performance.now();
+  PAfx.play('start');
+  raf=requestAnimationFrame(loop);
+}
+function end(){
+  running=false;cancelAnimationFrame(raf);
+  PAfx.play('gameover');
+  document.getElementById('finalScore').textContent=score;
+  const s=score>=80?'⭐⭐⭐ BEAVER LEGEND':score>=50?'⭐⭐ ROAD WARRIOR':score>=20?'⭐ ROAD TRIPPER':'ROOKIE DRIVER';
+  document.getElementById('stars').textContent=s;
+  document.getElementById('over').classList.remove('hidden');
+}
+function share(){
+  const txt=`I drove ${score} miles in ${GAME} by ${COMPANY}! 🦫🚗`;
+  if(navigator.share)navigator.share({title:GAME,text:txt,url:location.href}).catch(()=>{});
+  else{navigator.clipboard?.writeText(txt+' '+location.href);alert('Copied!')}
+}
+</script>
+</body>
+</html>

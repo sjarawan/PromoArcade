@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>Heat Wave — Dave's Hot Chicken</title>
+<meta name="description" content="Dodge the heat in this Dave's Hot Chicken mini-game. Survive the wave to unlock a fiery reward!"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@500;700;800&display=swap" rel="stylesheet"/>
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  :root{--red:#C8161D;--yellow:#FFC828;--black:#111;--cream:#FFF4DC}
+  html,body{height:100%;overflow:hidden;background:var(--black);font-family:'Inter',sans-serif;user-select:none;-webkit-user-select:none;touch-action:none;-webkit-tap-highlight-color:transparent}
+  #game{position:fixed;inset:0;overflow:hidden;background:radial-gradient(ellipse at center,#3A0808 0%,#1A0303 100%)}
+  #hud{position:absolute;top:0;left:0;right:0;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;z-index:5;pointer-events:none}
+  .brand{background:var(--red);padding:6px 14px;border-radius:4px;box-shadow:0 0 0 2px var(--yellow),0 3px 12px rgba(200,22,29,.5);transform:rotate(-2deg)}
+  .brand-name{font-family:'Bebas Neue';font-size:20px;letter-spacing:1.5px;color:var(--yellow);line-height:1}
+  .brand-sub{font-size:8px;color:#fff;font-weight:800;letter-spacing:2px}
+  .score-box{text-align:right;color:#fff}
+  .score-lbl{font-family:'Bebas Neue';font-size:11px;letter-spacing:3px;color:var(--yellow);line-height:1}
+  .score-val{font-family:'Bebas Neue';font-size:34px;color:#fff;line-height:1;text-shadow:0 0 20px rgba(255,200,40,.5)}
+  #player{position:absolute;bottom:40px;width:56px;height:56px;will-change:left;font-size:42px;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 4px 10px rgba(255,200,40,.4))}
+  .pepper{position:absolute;font-size:34px;will-change:transform;filter:drop-shadow(0 4px 8px rgba(255,80,0,.6))}
+  .pepper::after{content:'';position:absolute;inset:-4px;background:radial-gradient(circle,rgba(255,120,0,.4),transparent 70%);border-radius:50%;z-index:-1}
+  .heat-bar{position:absolute;top:70px;left:18px;right:18px;height:6px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden;z-index:4}
+  .heat-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--yellow),#FF6B00,var(--red));transition:width .3s;border-radius:3px}
+  .screen{position:absolute;inset:0;background:rgba(26,3,3,.94);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;z-index:20;padding:20px}
+  .screen.hidden{display:none}
+  .panel{background:linear-gradient(180deg,#1F0505,#0D0202);border:2px solid var(--yellow);border-radius:16px;padding:32px 28px;max-width:360px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(200,22,29,.4)}
+  .flame{font-size:52px;margin-bottom:8px}
+  .tag{font-family:'Bebas Neue';font-size:13px;letter-spacing:4px;color:var(--yellow)}
+  .title{font-family:'Bebas Neue';font-size:54px;color:#fff;line-height:1;margin:4px 0 8px;letter-spacing:2px}
+  .title em{font-style:normal;color:var(--red);text-shadow:0 0 20px rgba(200,22,29,.6)}
+  .desc{font-size:13px;color:rgba(255,255,255,.7);line-height:1.5;margin-bottom:22px}
+  .btn{background:var(--red);color:#fff;border:none;padding:14px 40px;border-radius:4px;font-family:'Bebas Neue';font-size:20px;letter-spacing:3px;cursor:pointer;transition:transform .1s;border:2px solid var(--yellow)}
+  .btn:active{transform:scale(.95)}
+  .btn.outline{background:transparent;color:var(--yellow);border-color:var(--yellow);margin-top:10px;padding:10px 28px;font-size:14px}
+  .final-score{font-family:'Bebas Neue';font-size:80px;color:var(--yellow);line-height:1;text-shadow:0 0 30px rgba(255,200,40,.6)}
+  .final-lbl{font-family:'Bebas Neue';font-size:11px;letter-spacing:3px;color:rgba(255,255,255,.5);margin-bottom:8px}
+  .coupon{background:var(--yellow);color:var(--black);border-radius:8px;padding:16px;margin-bottom:16px;transform:rotate(-1deg);border:3px dashed var(--red)}
+  .coupon-title{font-family:'Bebas Neue';font-size:14px;letter-spacing:3px;color:var(--red);margin-bottom:4px}
+  .coupon-code{font-family:'Bebas Neue';font-size:28px;color:var(--black);letter-spacing:3px}
+  .coupon-sub{font-size:11px;color:#5A1D1D;margin-top:4px;font-weight:700}
+  .logo-slot{width:72px;height:72px;background:var(--red);border-radius:12px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:42px;box-shadow:0 0 0 3px var(--yellow);transform:rotate(-4deg)}
+</style>
+<script src="fx.js" defer></script>
+</head>
+<body>
+<div id="game">
+  <div id="hud">
+    <div class="brand">
+      <div class="brand-name">DAVE'S</div>
+      <div class="brand-sub">HOT CHICKEN</div>
+    </div>
+    <div class="score-box">
+      <div class="score-lbl">SURVIVED</div>
+      <div class="score-val" id="score">0</div>
+    </div>
+  </div>
+  <div class="heat-bar"><div class="heat-fill" id="heatFill"></div></div>
+  <div id="player">🐔</div>
+
+  <div class="screen" id="start">
+    <div class="panel">
+      <!-- LOGO SLOT: Replace with <img src="../assets/logos/daves.png"> -->
+      <div class="logo-slot">🔥</div>
+      <div class="tag">DAVE'S HOT CHICKEN</div>
+      <h1 class="title">Heat <em>Wave</em></h1>
+      <p class="desc">Dodge the incoming heat! Move left and right to avoid flying peppers. Survive <b>25 seconds</b> to earn a fiery reward.</p>
+      <button class="btn" onclick="start()">Bring The Heat</button>
+    </div>
+  </div>
+
+  <div class="screen hidden" id="over">
+    <div class="panel">
+      <div class="final-lbl">SECONDS SURVIVED</div>
+      <div class="final-score" id="finalScore">0</div>
+      <div id="rewardArea"></div>
+      <button class="btn" onclick="start()">Try Again</button>
+      <button class="btn outline" onclick="share()">Share</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const COMPANY="Dave's Hot Chicken",GAME='Heat Wave',TARGET=25,COUPON='HEAT7X';
+const game=document.getElementById('game'),player=document.getElementById('player'),scoreEl=document.getElementById('score'),heatFill=document.getElementById('heatFill');
+let W,H,px,running,peppers=[],startT,elapsed,spawnT,lastT,raf;
+function resize(){W=innerWidth;H=innerHeight;player.style.left=(px||W/2-28)+'px'}
+addEventListener('resize',resize);resize();
+function move(x){px=Math.max(0,Math.min(W-56,x-28));player.style.left=px+'px'}
+addEventListener('mousemove',e=>running&&move(e.clientX));
+addEventListener('touchmove',e=>{if(running&&e.touches[0]){e.preventDefault();move(e.touches[0].clientX)}},{passive:false});
+const EMOJI=['🌶️','🔥','🌶️','🌶️'];
+function spawn(){
+  const p=document.createElement('div');p.className='pepper';
+  p.textContent=EMOJI[Math.floor(Math.random()*EMOJI.length)];
+  p.x=Math.random()*(W-34);p.y=-40;p.vy=4+Math.random()*3+elapsed*.1;p.rot=0;p.vr=(Math.random()-.5)*20;
+  p.style.transform=`translate(${p.x}px,${p.y}px)`;game.appendChild(p);peppers.push(p);
+}
+function loop(t){
+  if(!running)return;
+  const dt=Math.min(32,t-lastT);lastT=t;elapsed=(t-startT)/1000;
+  scoreEl.textContent=Math.floor(elapsed);
+  heatFill.style.width=Math.min(100,(elapsed/TARGET)*100)+'%';
+  spawnT+=dt;if(spawnT>Math.max(400-elapsed*10,150)){spawnT=0;spawn()}
+  for(let i=peppers.length-1;i>=0;i--){
+    const p=peppers[i];p.y+=p.vy*(dt/16);p.rot+=p.vr*(dt/16);
+    p.style.transform=`translate(${p.x}px,${p.y}px) rotate(${p.rot}deg)`;
+    if(p.y>H-100&&p.y<H-44&&p.x+34>px+8&&p.x<px+48){PAfx.play('fire');PAfx.shake(600,10);PAfx.flash('#C8161D',300);PAfx.burst(p.x+17,p.y+17,'#FFC828',16);end();return}
+    if(p.y>H+40){p.remove();peppers.splice(i,1)}
+  }
+  raf=requestAnimationFrame(loop);
+}
+function start(){
+  document.getElementById('start').classList.add('hidden');
+  document.getElementById('over').classList.add('hidden');
+  peppers.forEach(p=>p.remove());peppers=[];
+  running=true;spawnT=0;startT=performance.now();lastT=startT;elapsed=0;
+  PAfx.play('start');
+  PAfx.music.start([220,277,330,415,277,330,415,554],140,'sawtooth');
+  raf=requestAnimationFrame(loop);
+}
+function end(){
+  running=false;cancelAnimationFrame(raf);
+  PAfx.music.stop();
+  const secs=Math.floor(elapsed);
+  document.getElementById('finalScore').textContent=secs;
+  const r=document.getElementById('rewardArea');
+  if(secs>=TARGET){
+    PAfx.play('win');
+    setTimeout(()=>{PAfx.burst(innerWidth/2,innerHeight/2,'#FFC828',24);PAfx.burst(innerWidth/2,innerHeight/2,'#C8161D',16);},150);
+    r.innerHTML=`<div class="coupon"><div class="coupon-title">🔥 HEAT UNLOCKED 🔥</div><div class="coupon-code">${COUPON}</div><div class="coupon-sub">FREE SLIDER WITH ANY COMBO</div></div>`;
+  }else{
+    PAfx.play('gameover');
+    r.innerHTML=`<p style="font-size:13px;color:rgba(255,255,255,.7);margin-bottom:16px;">Survive <b style="color:var(--yellow)">${TARGET}s</b> to unlock the reward!</p>`;
+  }
+  document.getElementById('over').classList.remove('hidden');
+}
+function share(){
+  const txt=`I survived ${Math.floor(elapsed)}s in ${GAME} by ${COMPANY}! 🔥`;
+  if(navigator.share)navigator.share({title:GAME,text:txt,url:location.href}).catch(()=>{});
+  else{navigator.clipboard?.writeText(txt+' '+location.href);alert('Copied!')}
+}
+</script>
+</body>
+</html>

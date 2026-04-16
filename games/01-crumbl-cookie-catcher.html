@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>Cookie Catcher — Crumbl Cookies</title>
+<meta name="description" content="Catch fresh-baked cookies in this Crumbl Cookies mini-game. Hit the score target to unlock a sweet reward!"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  :root{--pink:#F8C8DC;--pink-dark:#EC9CC7;--brown:#5D3A1F;--cream:#FFF8F0;--accent:#E91E63}
+  html,body{height:100%;overflow:hidden;background:var(--pink);font-family:'Fredoka',sans-serif;user-select:none;-webkit-user-select:none;touch-action:none;-webkit-tap-highlight-color:transparent}
+  #game{position:fixed;inset:0;overflow:hidden;background:linear-gradient(180deg,#FFE4EC 0%,#F8C8DC 100%)}
+  #hud{position:absolute;top:0;left:0;right:0;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;z-index:5;pointer-events:none}
+  .brand{background:var(--cream);padding:8px 16px;border-radius:30px;box-shadow:0 3px 10px rgba(93,58,31,.15)}
+  .brand-name{font-size:11px;letter-spacing:2px;color:var(--brown);font-weight:700;text-transform:uppercase;line-height:1}
+  .brand-sub{font-size:9px;color:var(--pink-dark);font-weight:600;letter-spacing:1px}
+  .score-box{background:var(--brown);color:var(--cream);padding:8px 18px;border-radius:30px;text-align:right;box-shadow:0 3px 10px rgba(93,58,31,.25)}
+  .score-lbl{font-size:9px;letter-spacing:2px;opacity:.7;line-height:1}
+  .score-val{font-size:22px;font-weight:700;line-height:1.1}
+  #basket{position:absolute;bottom:24px;width:110px;height:60px;background:linear-gradient(180deg,#C4896F 0%,#8B5A3C 100%);border-radius:0 0 60px 60px;border-top:6px solid #6B3E24;transition:none;will-change:left}
+  #basket::before{content:'';position:absolute;top:-12px;left:0;right:0;height:12px;background:repeating-linear-gradient(90deg,#8B5A3C 0 6px,#6B3E24 6px 12px);border-radius:6px 6px 0 0}
+  .cookie{position:absolute;width:44px;height:44px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#D4A574,#8B5A3C);box-shadow:inset -3px -5px 8px rgba(0,0,0,.2);will-change:transform,top}
+  .cookie::before,.cookie::after{content:'';position:absolute;width:7px;height:7px;background:#3D2817;border-radius:50%;box-shadow:14px 4px 0 #3D2817,4px 16px 0 #3D2817,20px 20px 0 #3D2817,10px 26px 0 #3D2817}
+  .cookie::before{top:8px;left:8px}
+  .cookie.bad{background:radial-gradient(circle at 35% 30%,#4A2F1A,#1F1008)}
+  .cookie.bad::before,.cookie.bad::after{background:#666}
+  .screen{position:absolute;inset:0;background:rgba(248,200,220,.96);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;z-index:20;padding:20px}
+  .screen.hidden{display:none}
+  .panel{background:var(--cream);border-radius:24px;padding:32px 28px;max-width:360px;width:100%;text-align:center;box-shadow:0 16px 40px rgba(93,58,31,.25)}
+  .title{font-size:32px;color:var(--brown);font-weight:700;line-height:1;margin-bottom:4px}
+  .title em{font-style:normal;color:var(--accent)}
+  .tag{font-size:11px;letter-spacing:3px;color:var(--pink-dark);font-weight:600;text-transform:uppercase;margin-bottom:18px}
+  .desc{font-size:14px;color:#7A5A40;line-height:1.5;margin-bottom:22px}
+  .btn{background:var(--accent);color:#fff;border:none;padding:14px 40px;border-radius:40px;font-family:inherit;font-size:16px;font-weight:600;cursor:pointer;box-shadow:0 4px 14px rgba(233,30,99,.35);transition:transform .1s}
+  .btn:active{transform:scale(.95)}
+  .btn.outline{background:transparent;color:var(--brown);border:2px solid var(--brown);box-shadow:none;padding:12px 32px;font-size:13px;margin-top:10px}
+  .final-score{font-size:60px;color:var(--accent);font-weight:700;line-height:1;margin:12px 0 4px}
+  .final-lbl{font-size:10px;letter-spacing:3px;color:var(--pink-dark);font-weight:600;text-transform:uppercase;margin-bottom:14px}
+  .coupon{background:linear-gradient(135deg,#FFE066,#FFC107);border:2px dashed #8B5A3C;border-radius:16px;padding:16px;margin-bottom:16px}
+  .coupon-title{font-size:11px;letter-spacing:2px;color:#8B5A3C;font-weight:700;text-transform:uppercase;margin-bottom:6px}
+  .coupon-code{font-size:22px;color:var(--brown);font-weight:700;letter-spacing:2px}
+  .coupon-sub{font-size:11px;color:#8B5A3C;margin-top:4px}
+  .logo-slot{width:64px;height:64px;background:var(--pink);border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:36px}
+</style>
+<script src="fx.js" defer></script>
+</head>
+<body>
+<div id="game">
+  <div id="hud">
+    <div class="brand">
+      <div class="brand-name">Crumbl</div>
+      <div class="brand-sub">COOKIES</div>
+    </div>
+    <div class="score-box">
+      <div class="score-lbl">SCORE</div>
+      <div class="score-val" id="score">0</div>
+    </div>
+  </div>
+  <div id="basket"></div>
+
+  <div class="screen" id="start">
+    <div class="panel">
+      <!-- LOGO SLOT: Replace emoji with <img src="../assets/logos/crumbl.png"> -->
+      <div class="logo-slot">🍪</div>
+      <div class="tag">CRUMBL COOKIES PRESENTS</div>
+      <h1 class="title">Cookie <em>Catcher</em></h1>
+      <p class="desc">Move the basket to catch falling cookies. Avoid the burnt ones! Hit <b>30 points</b> to unlock a sweet reward.</p>
+      <button class="btn" onclick="start()">Start Catching</button>
+    </div>
+  </div>
+
+  <div class="screen hidden" id="over">
+    <div class="panel">
+      <div class="final-lbl">YOUR SCORE</div>
+      <div class="final-score" id="finalScore">0</div>
+      <div id="rewardArea"></div>
+      <button class="btn" onclick="start()">Play Again</button>
+      <button class="btn outline" onclick="share()">Share Score</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const COMPANY='Crumbl Cookies',GAME='Cookie Catcher',TARGET=30,COUPON='CRUMBL10';
+const game=document.getElementById('game'),basket=document.getElementById('basket'),scoreEl=document.getElementById('score');
+let W,H,bx,score,running,cookies=[],spawnT=0,lastT=0,raf;
+function resize(){W=innerWidth;H=innerHeight;if(basket)basket.style.left=(bx||W/2-55)+'px'}
+addEventListener('resize',resize);resize();
+function move(x){bx=Math.max(0,Math.min(W-110,x-55));basket.style.left=bx+'px'}
+addEventListener('mousemove',e=>running&&move(e.clientX));
+addEventListener('touchmove',e=>{if(running&&e.touches[0]){e.preventDefault();move(e.touches[0].clientX)}},{passive:false});
+function spawn(){
+  const c=document.createElement('div');
+  c.className='cookie'+(Math.random()<.15?' bad':'');
+  c.x=Math.random()*(W-44);c.y=-44;c.vy=3+Math.random()*2.5+score*.03;
+  c.bad=c.classList.contains('bad');
+  c.style.transform=`translate(${c.x}px,${c.y}px)`;
+  game.appendChild(c);cookies.push(c);
+}
+function loop(t){
+  if(!running)return;
+  const dt=Math.min(32,t-lastT);lastT=t;
+  spawnT+=dt;if(spawnT>Math.max(450-score*4,220)){spawnT=0;spawn()}
+  for(let i=cookies.length-1;i>=0;i--){
+    const c=cookies[i];c.y+=c.vy*(dt/16);
+    c.style.transform=`translate(${c.x}px,${c.y}px) rotate(${c.y}deg)`;
+    if(c.y>H-84&&c.y<H-24&&c.x+44>bx&&c.x<bx+110){
+      if(c.bad){PAfx.play('bad');PAfx.shake(500,8);PAfx.flash('#C8161D',260);end();return}
+      score++;scoreEl.textContent=score;
+      const cx=c.x+22,cy=H-60;
+      PAfx.play(score%10===0?'powerup':'coin');
+      PAfx.burst(cx,cy,'#D4A574',10);
+      PAfx.popup(cx,cy,'+1','#FFE066');
+      c.remove();cookies.splice(i,1);
+    }else if(c.y>H){c.remove();cookies.splice(i,1);if(!c.bad){/* miss ok */}}
+  }
+  raf=requestAnimationFrame(loop);
+}
+function start(){
+  document.getElementById('start').classList.add('hidden');
+  document.getElementById('over').classList.add('hidden');
+  cookies.forEach(c=>c.remove());cookies=[];
+  score=0;scoreEl.textContent=0;running=true;spawnT=0;lastT=performance.now();
+  PAfx.play('start');
+  raf=requestAnimationFrame(loop);
+}
+function end(){
+  running=false;cancelAnimationFrame(raf);
+  document.getElementById('finalScore').textContent=score;
+  const r=document.getElementById('rewardArea');
+  if(score>=TARGET){
+    PAfx.play('win');
+    setTimeout(()=>{PAfx.burst(innerWidth/2,innerHeight/2,'#FFD700',24);PAfx.burst(innerWidth/2,innerHeight/2,'#E91E63',16);},150);
+    r.innerHTML=`<div class="coupon"><div class="coupon-title">🎉 Reward Unlocked</div><div class="coupon-code">${COUPON}</div><div class="coupon-sub">10% off your next cookie order</div></div>`;
+  }else{
+    PAfx.play('gameover');
+    r.innerHTML=`<p style="font-size:13px;color:#7A5A40;margin-bottom:16px;">Catch <b>${TARGET}</b> cookies to unlock a reward!</p>`;
+  }
+  document.getElementById('over').classList.remove('hidden');
+}
+function share(){
+  const txt=`I caught ${score} cookies in ${GAME} by ${COMPANY}! Can you beat me?`;
+  if(navigator.share)navigator.share({title:GAME,text:txt,url:location.href}).catch(()=>{});
+  else{navigator.clipboard?.writeText(txt+' '+location.href);alert('Score copied to clipboard!')}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>Taco Toss — Torchy's Tacos</title>
+<meta name="description" content="Aim and toss tacos into the basket! Hit the score target to unlock a damn good reward."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Inter:wght@500;700&display=swap" rel="stylesheet"/>
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  :root{--orange:#F37021;--red:#C6211B;--black:#1A1A1A;--cream:#FFF4E0;--yellow:#FFC627}
+  html,body{height:100%;overflow:hidden;background:var(--orange);font-family:'Inter',sans-serif;user-select:none;-webkit-user-select:none;touch-action:none;-webkit-tap-highlight-color:transparent}
+  #game{position:fixed;inset:0;overflow:hidden;background:linear-gradient(180deg,#FFD591 0%,#F37021 60%,#C6211B 100%)}
+  #hud{position:absolute;top:0;left:0;right:0;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;z-index:5;pointer-events:none}
+  .brand{background:var(--black);padding:8px 16px;border-radius:4px;border:2px solid var(--yellow);transform:rotate(-2deg)}
+  .brand-name{font-family:'Alfa Slab One';font-size:16px;color:var(--yellow);line-height:1;letter-spacing:1px}
+  .brand-sub{font-size:9px;color:#fff;font-weight:700;letter-spacing:2px;margin-top:2px}
+  .score-box{background:var(--cream);color:var(--red);padding:8px 18px;border-radius:4px;text-align:right;border:2px solid var(--black)}
+  .score-lbl{font-family:'Alfa Slab One';font-size:10px;letter-spacing:2px;color:var(--black);line-height:1}
+  .score-val{font-family:'Alfa Slab One';font-size:24px;line-height:1.1}
+  #basket{position:absolute;top:30%;width:90px;height:60px;background:linear-gradient(180deg,#8B5A3C 30%,#5D3A1F 100%);border-radius:0 0 45px 45px;border-top:6px solid var(--yellow);will-change:left,top;box-shadow:0 8px 20px rgba(0,0,0,.3)}
+  #basket::before{content:'BASKET';position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-family:'Alfa Slab One';font-size:9px;letter-spacing:2px;color:var(--cream);text-shadow:0 2px 4px rgba(0,0,0,.4)}
+  #launcher{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);width:70px;height:70px;font-size:56px;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 4px 8px rgba(0,0,0,.3))}
+  .taco{position:absolute;font-size:40px;will-change:transform;pointer-events:none;filter:drop-shadow(0 4px 8px rgba(0,0,0,.4))}
+  .aim-line{position:absolute;bottom:90px;left:50%;width:3px;height:100px;background:linear-gradient(180deg,var(--yellow),transparent);transform-origin:bottom center;pointer-events:none;opacity:.7}
+  .power-bar{position:absolute;bottom:14px;left:18px;right:18px;height:8px;background:rgba(0,0,0,.3);border-radius:4px;overflow:hidden;z-index:4}
+  .power-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--yellow),var(--orange),var(--red));border-radius:4px;transition:none}
+  .instr{position:absolute;top:80px;left:0;right:0;text-align:center;color:#fff;font-family:'Alfa Slab One';font-size:12px;letter-spacing:2px;z-index:4;text-shadow:0 2px 4px rgba(0,0,0,.4)}
+  .screen{position:absolute;inset:0;background:rgba(198,33,27,.95);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;z-index:20;padding:20px}
+  .screen.hidden{display:none}
+  .panel{background:var(--cream);border-radius:16px;padding:32px 28px;max-width:360px;width:100%;text-align:center;box-shadow:0 16px 40px rgba(0,0,0,.4);border:4px solid var(--black)}
+  .tag{font-family:'Alfa Slab One';font-size:12px;letter-spacing:3px;color:var(--red)}
+  .title{font-family:'Alfa Slab One';font-size:42px;color:var(--black);line-height:1;margin:6px 0 8px;letter-spacing:1px}
+  .title em{font-style:normal;color:var(--orange)}
+  .desc{font-size:13px;color:#5C4530;line-height:1.5;margin-bottom:22px}
+  .btn{background:var(--red);color:var(--cream);border:none;padding:14px 40px;border-radius:6px;font-family:'Alfa Slab One';font-size:16px;letter-spacing:2px;cursor:pointer;box-shadow:0 5px 0 var(--black);transition:all .1s}
+  .btn:active{transform:translateY(3px);box-shadow:0 2px 0 var(--black)}
+  .btn.outline{background:transparent;color:var(--black);border:2px solid var(--black);box-shadow:none;margin-top:10px;padding:10px 28px;font-size:12px}
+  .final-score{font-family:'Alfa Slab One';font-size:72px;color:var(--red);line-height:1}
+  .final-lbl{font-family:'Alfa Slab One';font-size:11px;letter-spacing:3px;color:var(--black);margin:8px 0}
+  .coupon{background:var(--yellow);border:3px dashed var(--red);padding:16px;margin-bottom:16px;transform:rotate(-1deg)}
+  .coupon-title{font-family:'Alfa Slab One';font-size:12px;letter-spacing:2px;color:var(--red);margin-bottom:6px}
+  .coupon-code{font-family:'Alfa Slab One';font-size:24px;color:var(--black);letter-spacing:3px}
+  .coupon-sub{font-size:11px;color:var(--black);margin-top:4px;font-weight:700}
+  .logo-slot{width:72px;height:72px;background:var(--red);border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:42px;border:3px solid var(--yellow)}
+  .tosses{font-size:12px;color:var(--red);font-weight:700;margin-top:8px}
+</style>
+<script src="fx.js" defer></script>
+</head>
+<body>
+<div id="game">
+  <div id="hud">
+    <div class="brand">
+      <div class="brand-name">TORCHY'S</div>
+      <div class="brand-sub">DAMN GOOD TACOS</div>
+    </div>
+    <div class="score-box">
+      <div class="score-lbl">HITS</div>
+      <div class="score-val" id="score">0</div>
+    </div>
+  </div>
+  <div class="instr" id="instr">HOLD TO AIM · RELEASE TO TOSS</div>
+  <div id="basket"></div>
+  <div id="launcher">🌮</div>
+  <div class="power-bar"><div class="power-fill" id="powerFill"></div></div>
+
+  <div class="screen" id="start">
+    <div class="panel">
+      <!-- LOGO SLOT: Replace with <img src="../assets/logos/torchys.png"> -->
+      <div class="logo-slot">🌮</div>
+      <div class="tag">TORCHY'S TACOS</div>
+      <h1 class="title">Taco <em>Toss</em></h1>
+      <p class="desc">Hold to aim, release to toss! The basket moves — time it right. Land <b>5 tacos</b> in the basket to unlock a damn good reward.</p>
+      <button class="btn" onclick="start()">START TOSSING</button>
+    </div>
+  </div>
+
+  <div class="screen hidden" id="over">
+    <div class="panel">
+      <div class="final-lbl">TACOS LANDED</div>
+      <div class="final-score" id="finalScore">0</div>
+      <div class="tosses" id="tossCount"></div>
+      <div id="rewardArea"></div>
+      <button class="btn" onclick="start()">Toss Again</button>
+      <button class="btn outline" onclick="share()">Share</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const COMPANY="Torchy's Tacos",GAME='Taco Toss',TARGET=5,COUPON='DMNGD',MAX_TOSSES=8;
+const game=document.getElementById('game'),basket=document.getElementById('basket'),scoreEl=document.getElementById('score'),powerFill=document.getElementById('powerFill'),launcher=document.getElementById('launcher');
+let W,H,score,running,tacos=[],power=0,charging,basketX,basketDir,basketY,tossesLeft,instrEl=document.getElementById('instr');
+function resize(){W=innerWidth;H=innerHeight}
+addEventListener('resize',resize);resize();
+function loop(){
+  if(!running)return;
+  basketX+=basketDir*2.5;
+  if(basketX<10||basketX>W-100){basketDir*=-1}
+  basket.style.left=basketX+'px';
+  basket.style.top=basketY+'px';
+  if(charging){power=Math.min(100,power+2.5);powerFill.style.width=power+'%'}
+  for(let i=tacos.length-1;i>=0;i--){
+    const t=tacos[i];t.vy+=.5;t.x+=t.vx;t.y+=t.vy;t.rot+=10;
+    t.el.style.transform=`translate(${t.x}px,${t.y}px) rotate(${t.rot}deg)`;
+    // check basket hit
+    if(!t.done&&t.y>basketY&&t.y<basketY+40&&t.x>basketX+10&&t.x<basketX+80){
+      t.done=true;score++;scoreEl.textContent=score;
+      PAfx.play('win');
+      PAfx.burst(t.x,t.y,'#FFC627',14);
+      PAfx.popup(t.x,t.y,'+1 HIT!','#FFC627');
+      t.el.style.opacity=0;setTimeout(()=>{t.el.remove()},50);
+      tacos.splice(i,1);continue;
+    }
+    if(t.y>H+60){t.el.remove();tacos.splice(i,1)}
+  }
+  requestAnimationFrame(loop);
+}
+function press(e){if(!running||tossesLeft<=0)return;charging=true;power=0;instrEl.style.opacity=0;PAfx.play('charge')}
+function release(){
+  if(!running||!charging)return;charging=false;
+  PAfx.play('release');
+  const el=document.createElement('div');el.className='taco';el.textContent='🌮';
+  const sx=W/2,sy=H-70;
+  el.style.transform=`translate(${sx-20}px,${sy}px)`;game.appendChild(el);
+  tacos.push({el,x:sx-20,y:sy,vx:0,vy:-(8+power*.12),rot:0,done:false});
+  tossesLeft--;powerFill.style.width='0%';power=0;
+  if(tossesLeft<=0){setTimeout(end,1200)}
+}
+game.addEventListener('pointerdown',press);
+game.addEventListener('pointerup',release);
+game.addEventListener('pointercancel',release);
+function start(){
+  document.getElementById('start').classList.add('hidden');
+  document.getElementById('over').classList.add('hidden');
+  tacos.forEach(t=>t.el.remove());tacos=[];
+  score=0;scoreEl.textContent=0;tossesLeft=MAX_TOSSES;running=true;charging=false;power=0;
+  basketX=W/2-45;basketDir=1;basketY=H*.3;instrEl.style.opacity=1;
+  PAfx.play('start');
+  requestAnimationFrame(loop);
+}
+function end(){
+  running=false;
+  document.getElementById('finalScore').textContent=score;
+  document.getElementById('tossCount').textContent=`${MAX_TOSSES} tosses · ${score} hits`;
+  const r=document.getElementById('rewardArea');
+  if(score>=TARGET){
+    PAfx.play('win');
+    setTimeout(()=>PAfx.burst(innerWidth/2,innerHeight/2,'#FFC627',24),150);
+    r.innerHTML=`<div class="coupon"><div class="coupon-title">🌮 REWARD UNLOCKED 🌮</div><div class="coupon-code">${COUPON}</div><div class="coupon-sub">BOGO TACOS ON YOUR NEXT ORDER</div></div>`;
+  }else{
+    PAfx.play('gameover');
+    r.innerHTML=`<p style="font-size:13px;color:#5C4530;margin-bottom:16px;">Land <b>${TARGET} tacos</b> in the basket to unlock the reward!</p>`;
+  }
+  document.getElementById('over').classList.remove('hidden');
+}
+function share(){
+  const txt=`I landed ${score}/${MAX_TOSSES} tacos in ${GAME} by ${COMPANY}! 🌮`;
+  if(navigator.share)navigator.share({title:GAME,text:txt,url:location.href}).catch(()=>{});
+  else{navigator.clipboard?.writeText(txt+' '+location.href);alert('Copied!')}
+}
+</script>
+</body>
+</html>

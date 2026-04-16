@@ -4,11 +4,59 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Games — PromoArcade</title>
-  <meta name="description" content="Explore the branded mini-games built by PromoArcade for real businesses. Play live demos and see what's possible." />
+  <meta name="description" content="Explore the branded mini-games built by PromoArcade. Live client games plus a full demo collection built for major brands." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
+  <style>
+    .game-thumb.tile-pink       { background: linear-gradient(135deg,#FFE4EC,#F8C8DC); }
+    .game-thumb.tile-daves      { background: linear-gradient(135deg,#2A0808,#C8161D); color:#FFC828; }
+    .game-thumb.tile-canes      { background: linear-gradient(135deg,#FFCC00,#FFD633); }
+    .game-thumb.tile-shack      { background: linear-gradient(135deg,#A7E8C4,#00A968); color:#fff; }
+    .game-thumb.tile-insomnia   { background: linear-gradient(135deg,#5B2A86,#2D1249); color:#FFD166; }
+    .game-thumb.tile-torchys    { background: linear-gradient(135deg,#F37021,#C6211B); color:#FFC627; }
+    .game-thumb.tile-bundt      { background: linear-gradient(135deg,#FCE4EC,#F4B6C2); }
+    .game-thumb.tile-bucees     { background: linear-gradient(135deg,#FFDE2D,#F5C800); }
+    .game-thumb.tile-schwab     { background: linear-gradient(135deg,#4A4A4A,#1A1A1A); color:#C8102E; }
+    .game-thumb.tile-topgolf    { background: linear-gradient(135deg,#0B3D91,#1E5FC4); color:#F47A20; }
+    .game-thumb.tile-shaveberry { background: linear-gradient(135deg,#FFE5EB,#FFB5A7); }
+    .game-thumb.tile-pickle     { background: linear-gradient(135deg,#D6F549,#52B788); }
+    .game-thumb .emoji { font-size: 68px; }
+
+    .badge-row { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; }
+    .chip {
+      display:inline-flex; align-items:center; gap:4px;
+      padding:3px 10px; border-radius:50px;
+      font-size:0.7rem; font-weight:600; letter-spacing:0.02em;
+    }
+    .chip-live   { background:#DCFCE7; color:#166534; }
+    .chip-demo   { background:var(--blue-50); color:var(--blue-600); }
+    .chip-coupon { background:#FEF3C7; color:#92400E; }
+    .chip-score  { background:#F3F4F6; color:var(--gray-600); }
+    .chip-mech   { background:var(--blue-50); color:var(--blue-600); }
+
+    .games-filter {
+      display:flex; justify-content:center; gap:8px; flex-wrap:wrap;
+      margin-bottom:32px;
+    }
+    .filter-btn {
+      padding:8px 18px; border-radius:50px; border:1px solid var(--gray-200);
+      background:var(--white); color:var(--gray-600);
+      font-family:inherit; font-size:0.85rem; font-weight:600;
+      cursor:pointer; transition: all .15s ease;
+    }
+    .filter-btn:hover { border-color: var(--blue-600); color: var(--blue-600); }
+    .filter-btn.active { background: var(--blue-600); color: var(--white); border-color: var(--blue-600); }
+
+    .category-heading {
+      text-align:left; margin: 48px 0 20px;
+      padding-bottom: 12px; border-bottom: 1px solid var(--gray-200);
+    }
+    .category-heading h2 { font-size: 1.5rem; margin-bottom: 4px; }
+    .category-heading p { font-size: 0.9rem; color: var(--gray-600); }
+    .category-heading:first-of-type { margin-top: 0; }
+  </style>
 </head>
 <body>
 
@@ -41,65 +89,215 @@
     <div class="container">
       <span class="section-label">Portfolio</span>
       <h1>Games We've Built</h1>
-      <p>Real branded mini-games, live and driving results for real businesses. Play them, share them, and imagine what we could build for you.</p>
+      <p>Live client games plus a full collection of demo concepts built for major retail, food, and lifestyle brands. Tap any card to play.</p>
     </div>
   </section>
 
-  <!-- ========== GAMES GRID ========== -->
+  <!-- ========== FILTER + GRID ========== -->
   <section class="section">
     <div class="container">
+
+      <!-- Filter bar -->
+      <div class="games-filter">
+        <button class="filter-btn active" data-filter="all">All Games</button>
+        <button class="filter-btn" data-filter="live">Live Clients</button>
+        <button class="filter-btn" data-filter="demo">Demo Concepts</button>
+        <button class="filter-btn" data-filter="coupon">With Coupons</button>
+      </div>
+
+      <!-- ===== Live Client Games ===== -->
+      <div class="category-heading">
+        <h2>Live Client Games</h2>
+        <p>Real games built and launched for real businesses.</p>
+      </div>
       <div class="games-grid">
 
-        <!--
-          ============================================================
-          GAME CARD TEMPLATE
-          To add a new game, copy this block and update:
-            1. Thumbnail image (replace placeholder div with <img>)
-            2. Company name
-            3. Game name (h3)
-            4. Description (p)
-            5. Link href to the game page
-          ============================================================
-        -->
-
-        <!-- GAME CARD 1: Shave Berry -->
-        <div class="game-card">
-          <div class="game-thumb">
-            <!-- THUMBNAIL: Replace with <img src="assets/shaveberry-thumb.png" alt="Berry Bounce"> -->
-            <div class="game-thumb-placeholder">🍓<span>Preview</span></div>
-          </div>
+        <div class="game-card" data-tags="live">
+          <div class="game-thumb tile-shaveberry"><span class="emoji">🍓</span></div>
           <div class="game-info">
+            <div class="badge-row">
+              <span class="chip chip-live">● Live</span>
+              <span class="chip chip-mech">Catching</span>
+            </div>
             <div class="game-company">Shave Berry</div>
-            <!-- GAME NAME: Update when ready -->
             <h3>Berry Bounce</h3>
-            <p>Catch and bounce shaved berry desserts to hungry customers in this fun, fast-paced branded game built for Shave Berry. Designed to engage, entertain, and drive sharing.</p>
-            <!-- GAME LINK: Points to the Shave Berry game -->
-            <a href="games/shave-berry/index.html" class="btn btn-primary" style="width:100%;justify-content:center;">Play Game</a>
+            <p>Catch and bounce shaved berry desserts to hungry customers in this fun, fast-paced branded game.</p>
+            <a href="games/shave-berry.html" class="btn btn-primary" style="width:100%;justify-content:center;">Play Game</a>
           </div>
         </div>
 
-        <!-- GAME CARD 2: The Flying Pickle -->
-        <div class="game-card">
-          <div class="game-thumb">
-            <!-- THUMBNAIL: Replace with <img src="assets/flyingpickle-thumb.png" alt="Kitchen Chaos"> -->
-            <div class="game-thumb-placeholder">🥒<span>Preview</span></div>
-          </div>
+        <div class="game-card" data-tags="live">
+          <div class="game-thumb tile-pickle"><span class="emoji">🥒</span></div>
           <div class="game-info">
+            <div class="badge-row">
+              <span class="chip chip-live">● Live</span>
+              <span class="chip chip-mech">Survival</span>
+            </div>
             <div class="game-company">The Flying Pickle</div>
-            <!-- GAME NAME: Update when ready -->
             <h3>Kitchen Chaos</h3>
-            <p>Smash back pickleballs in this fast-paced survival game created for The Flying Pickle. Built to entertain customers, promote sharing, and drive traffic.</p>
-            <!-- GAME LINK: Points to the Flying Pickle game -->
-            <a href="games/flying-pickle/index.html" class="btn btn-primary" style="width:100%;justify-content:center;">Play Game</a>
+            <p>Smash back pickleballs in this fast-paced survival game built to entertain customers and drive traffic.</p>
+            <a href="games/flying-pickle.html" class="btn btn-primary" style="width:100%;justify-content:center;">Play Game</a>
           </div>
         </div>
 
-        <!--
-          ============================================================
-          ADD MORE GAME CARDS BELOW
-          Copy a game-card block above and update the details.
-          ============================================================
-        -->
+      </div>
+
+      <!-- ===== Demo Concept Games ===== -->
+      <div class="category-heading">
+        <h2>Demo Concepts for Top Brands</h2>
+        <p>Playable mini-game concepts reimagined for major brands — each with unique mechanics and branded styling.</p>
+      </div>
+      <div class="games-grid">
+
+        <div class="game-card" data-tags="demo coupon">
+          <div class="game-thumb tile-pink"><span class="emoji">🍪</span></div>
+          <div class="game-info">
+            <div class="badge-row">
+              <span class="chip chip-demo">Demo</span>
+              <span class="chip chip-mech">Catching</span>
+              <span class="chip chip-coupon">🎟 Coupon</span>
+            </div>
+            <div class="game-company">Crumbl Cookies</div>
+            <h3>Cookie Catcher</h3>
+            <p>Catch falling cookies in a basket — avoid the burnt ones! A sweet branded catching game.</p>
+            <a href="games/01-crumbl-cookie-catcher.html" class="btn btn-primary" style="width:100%;justify-content:center;">Play Demo</a>
+          </div>
+        </div>
+
+        <div class="game-card" data-tags="demo coupon">
+          <div class="game-thumb tile-daves"><span class="emoji">🔥</span></div>
+          <div class="game-info">
+            <div class="badge-row">
+              <span class="chip chip-demo">Demo</span>
+              <span class="chip chip-mech">Dodging</span>
+              <span class="chip chip-coupon">🎟 Coupon</span>
+            </div>
+            <div class="game-company">Dave's Hot Chicken</div>
+            <h3>Heat Wave</h3>
+            <p>Dodge incoming peppers and survive the heat — how long can you take it?</p>
+            <a href="games/02-daves-heat-wave.html" class="btn btn-primary" style="width:100%;justify-content:center;">Play Demo</a>
+          </div>
+        </div>
+
+        <div class="game-card" data-tags="demo coupon">
+          <div class="game-thumb tile-canes"><span class="emoji">🍗</span></div>
+          <div class="game-info">
+            <div class="badge-row">
+              <span class="chip chip-demo">Demo</span>
+              <span class="chip chip-mech">Tapping</span>
+              <span class="chip chip-coupon">🎟 Coupon</span>
+            </div>
+            <div class="game-company">Raising Cane's</div>
+            <h3>Finger Frenzy</h3>
+            <p>Tap chicken fingers as fast as you can in 30 seconds. Pure speed tapping fun.</p>
+            <a href="games/03-canes-finger-frenzy.html" class="btn btn-primary" style="width:100%;justify-content:center;">Play Demo</a>
+          </div>
+        </div>
+
+        <div class="game-card" data-tags="demo">
+          <div class="game-thumb tile-shack"><span class="emoji">🍔</span></div>
+          <div class="game-info">
+            <div class="badge-row">
+              <span class="chip chip-demo">Demo</span>
+              <span class="chip chip-mech">Stacking</span>
+              <span class="chip chip-score">Score Only</span>
+            </div>
+            <div class="game-company">Shake Shack</div>
+            <h3>Shack Stack</h3>
+            <p>Stack burger layers with perfect timing. One wobble and it all comes tumbling down.</p>
+            <a href="games/04-shakeshack-shack-stack.html" class="btn btn-primary" style="width:100%;justify-content:center;">Play Demo</a>
+          </div>
+        </div>
+
+        <div class="game-card" data-tags="demo coupon">
+          <div class="game-thumb tile-insomnia"><span class="emoji">🌙</span></div>
+          <div class="game-info">
+            <div class="badge-row">
+              <span class="chip chip-demo">Demo</span>
+              <span class="chip chip-mech">Catching</span>
+              <span class="chip chip-coupon">🎟 Coupon</span>
+            </div>
+            <div class="game-company">Insomnia Cookies</div>
+            <h3>Midnight Munch</h3>
+            <p>Catch cookies falling from the moon. A late-night branded catching game.</p>
+            <a href="games/05-insomnia-midnight-munch.html" class="btn btn-primary" style="width:100%;justify-content:center;">Play Demo</a>
+          </div>
+        </div>
+
+        <div class="game-card" data-tags="demo coupon">
+          <div class="game-thumb tile-torchys"><span class="emoji">🌮</span></div>
+          <div class="game-info">
+            <div class="badge-row">
+              <span class="chip chip-demo">Demo</span>
+              <span class="chip chip-mech">Aiming</span>
+              <span class="chip chip-coupon">🎟 Coupon</span>
+            </div>
+            <div class="game-company">Torchy's Tacos</div>
+            <h3>Taco Toss</h3>
+            <p>Hold to aim, release to toss tacos at a moving basket. Timing and power combined.</p>
+            <a href="games/06-torchys-taco-toss.html" class="btn btn-primary" style="width:100%;justify-content:center;">Play Demo</a>
+          </div>
+        </div>
+
+        <div class="game-card" data-tags="demo coupon">
+          <div class="game-thumb tile-bundt"><span class="emoji">🎂</span></div>
+          <div class="game-info">
+            <div class="badge-row">
+              <span class="chip chip-demo">Demo</span>
+              <span class="chip chip-mech">Timing</span>
+              <span class="chip chip-coupon">🎟 Coupon</span>
+            </div>
+            <div class="game-company">Nothing Bundt Cakes</div>
+            <h3>Bundt Drop</h3>
+            <p>Time your drop to land the bundt in the perfect zone. Precision meets dessert.</p>
+            <a href="games/07-nothingbundt-bundt-drop.html" class="btn btn-primary" style="width:100%;justify-content:center;">Play Demo</a>
+          </div>
+        </div>
+
+        <div class="game-card" data-tags="demo">
+          <div class="game-thumb tile-bucees"><span class="emoji">🦫</span></div>
+          <div class="game-info">
+            <div class="badge-row">
+              <span class="chip chip-demo">Demo</span>
+              <span class="chip chip-mech">Lane Switching</span>
+              <span class="chip chip-score">Score Only</span>
+            </div>
+            <div class="game-company">Buc-ee's</div>
+            <h3>Road Run</h3>
+            <p>Switch lanes to dodge traffic and grab beaver nuggets on your road trip.</p>
+            <a href="games/08-bucees-road-run.html" class="btn btn-primary" style="width:100%;justify-content:center;">Play Demo</a>
+          </div>
+        </div>
+
+        <div class="game-card" data-tags="demo coupon">
+          <div class="game-thumb tile-schwab"><span class="emoji">🛞</span></div>
+          <div class="game-info">
+            <div class="badge-row">
+              <span class="chip chip-demo">Demo</span>
+              <span class="chip chip-mech">Bouncing</span>
+              <span class="chip chip-coupon">🎟 Coupon</span>
+            </div>
+            <div class="game-company">Les Schwab Tires</div>
+            <h3>Tire Roll</h3>
+            <p>Tap to bounce the tire over obstacles. Keep rolling as fast as you can.</p>
+            <a href="games/09-lesschwab-tire-roll.html" class="btn btn-primary" style="width:100%;justify-content:center;">Play Demo</a>
+          </div>
+        </div>
+
+        <div class="game-card" data-tags="demo">
+          <div class="game-thumb tile-topgolf"><span class="emoji">⛳</span></div>
+          <div class="game-info">
+            <div class="badge-row">
+              <span class="chip chip-demo">Demo</span>
+              <span class="chip chip-mech">Aiming</span>
+              <span class="chip chip-score">Score Only</span>
+            </div>
+            <div class="game-company">Topgolf</div>
+            <h3>Chip Shot</h3>
+            <p>Lock your power, lock your aim, and land the perfect bullseye on a moving target.</p>
+            <a href="games/10-topgolf-chip-shot.html" class="btn btn-primary" style="width:100%;justify-content:center;">Play Demo</a>
+          </div>
+        </div>
 
       </div>
     </div>
@@ -132,10 +330,10 @@
           </ul>
         </div>
         <div>
-          <h4>Games</h4>
+          <h4>Live Games</h4>
           <ul>
-            <li><a href="games/shave-berry/index.html">Shave Berry</a></li>
-            <li><a href="games/flying-pickle/index.html">The Flying Pickle</a></li>
+            <li><a href="games/shave-berry.html">Shave Berry</a></li>
+            <li><a href="games/flying-pickle.html">The Flying Pickle</a></li>
           </ul>
         </div>
         <div>
@@ -154,5 +352,33 @@
   </footer>
 
   <script src="script.js"></script>
+  <script>
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const allCards = document.querySelectorAll('.game-card[data-tags]');
+    const catHeadings = document.querySelectorAll('.category-heading');
+
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const f = btn.dataset.filter;
+        filterBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        allCards.forEach(card => {
+          const tags = card.dataset.tags.split(' ');
+          const match = f === 'all' || tags.includes(f);
+          card.style.display = match ? '' : 'none';
+        });
+
+        catHeadings.forEach(h => {
+          const grid = h.nextElementSibling;
+          if (!grid) return;
+          const hasVisible = Array.from(grid.querySelectorAll('.game-card'))
+            .some(c => c.style.display !== 'none');
+          h.style.display = hasVisible ? '' : 'none';
+          grid.style.display = hasVisible ? '' : 'none';
+        });
+      });
+    });
+  </script>
 </body>
 </html>

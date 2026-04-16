@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>Finger Frenzy — Raising Cane's</title>
+<meta name="description" content="Tap fast in this Raising Cane's mini-game. Hit the score target to unlock a tasty reward!"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@500;700;800&display=swap" rel="stylesheet"/>
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  :root{--yellow:#FFCC00;--red:#B30838;--cream:#FFF4DC;--dark:#2A0A10}
+  html,body{height:100%;overflow:hidden;background:var(--yellow);font-family:'Inter',sans-serif;user-select:none;-webkit-user-select:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+  #game{position:fixed;inset:0;overflow:hidden;background:repeating-linear-gradient(135deg,#FFCC00 0 40px,#FFD633 40px 80px)}
+  #hud{position:absolute;top:0;left:0;right:0;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;z-index:5;pointer-events:none}
+  .brand{background:var(--red);padding:10px 18px;border-radius:0;box-shadow:4px 4px 0 var(--dark);border:3px solid var(--dark)}
+  .brand-name{font-family:'Bungee';font-size:16px;color:var(--yellow);line-height:1}
+  .brand-sub{font-size:9px;color:#fff;font-weight:800;letter-spacing:2px;margin-top:2px}
+  .score-box{background:var(--dark);color:var(--yellow);padding:10px 18px;border:3px solid var(--red);text-align:right;box-shadow:-4px 4px 0 var(--red)}
+  .score-lbl{font-family:'Bungee';font-size:10px;letter-spacing:2px;line-height:1}
+  .score-val{font-family:'Bungee';font-size:28px;color:#fff;line-height:1}
+  .timer{position:absolute;top:76px;left:50%;transform:translateX(-50%);background:var(--dark);color:var(--yellow);padding:6px 20px;border-radius:20px;font-family:'Bungee';font-size:14px;letter-spacing:2px;z-index:5;box-shadow:0 4px 0 var(--red)}
+  #field{position:absolute;inset:120px 20px 40px;}
+  .finger{position:absolute;width:90px;height:90px;border-radius:14px;background:linear-gradient(180deg,#D4A574 0%,#8B5A3C 100%);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:54px;transition:transform .1s;box-shadow:0 6px 0 #5D3A1F,0 8px 20px rgba(0,0,0,.3);border:3px solid var(--dark);will-change:transform,left,top}
+  .finger:active{transform:translateY(3px);box-shadow:0 3px 0 #5D3A1F}
+  .finger.hit{animation:hit .3s forwards}
+  @keyframes hit{to{transform:scale(1.3) rotate(20deg);opacity:0}}
+  .combo{position:absolute;font-family:'Bungee';font-size:28px;color:var(--red);text-shadow:2px 2px 0 var(--yellow),-2px -2px 0 var(--yellow),2px -2px 0 var(--yellow),-2px 2px 0 var(--yellow);pointer-events:none;animation:pop .6s forwards;z-index:3}
+  @keyframes pop{0%{transform:scale(.5) translateY(0);opacity:1}100%{transform:scale(1.4) translateY(-40px);opacity:0}}
+  .screen{position:absolute;inset:0;background:rgba(255,204,0,.96);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;z-index:20;padding:20px}
+  .screen.hidden{display:none}
+  .panel{background:var(--cream);border:4px solid var(--dark);border-radius:0;padding:32px 28px;max-width:360px;width:100%;text-align:center;box-shadow:8px 8px 0 var(--red)}
+  .tag{font-family:'Bungee';font-size:13px;letter-spacing:3px;color:var(--red)}
+  .title{font-family:'Bungee';font-size:44px;color:var(--dark);line-height:1;margin:8px 0}
+  .title em{font-style:normal;color:var(--red)}
+  .desc{font-size:14px;color:var(--dark);line-height:1.5;margin-bottom:22px}
+  .btn{background:var(--red);color:#fff;border:3px solid var(--dark);padding:14px 40px;font-family:'Bungee';font-size:18px;letter-spacing:2px;cursor:pointer;box-shadow:4px 4px 0 var(--dark);transition:all .1s}
+  .btn:active{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--dark)}
+  .btn.outline{background:transparent;color:var(--dark);margin-top:10px;padding:10px 28px;font-size:14px}
+  .final-score{font-family:'Bungee';font-size:72px;color:var(--red);line-height:1}
+  .final-lbl{font-family:'Bungee';font-size:11px;letter-spacing:3px;color:var(--dark);margin:8px 0}
+  .coupon{background:var(--yellow);border:3px dashed var(--red);padding:16px;margin-bottom:16px}
+  .coupon-title{font-family:'Bungee';font-size:12px;letter-spacing:2px;color:var(--red);margin-bottom:6px}
+  .coupon-code{font-family:'Bungee';font-size:24px;color:var(--dark);letter-spacing:3px}
+  .coupon-sub{font-size:11px;color:var(--dark);margin-top:4px;font-weight:700}
+  .logo-slot{width:80px;height:80px;background:var(--red);border:3px solid var(--dark);margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:44px;box-shadow:4px 4px 0 var(--dark)}
+</style>
+<script src="fx.js" defer></script>
+</head>
+<body>
+<div id="game">
+  <div id="hud">
+    <div class="brand">
+      <div class="brand-name">CANE'S</div>
+      <div class="brand-sub">CHICKEN FINGERS</div>
+    </div>
+    <div class="score-box">
+      <div class="score-lbl">TAPS</div>
+      <div class="score-val" id="score">0</div>
+    </div>
+  </div>
+  <div class="timer" id="timer">0:30</div>
+  <div id="field"></div>
+
+  <div class="screen" id="start">
+    <div class="panel">
+      <!-- LOGO SLOT: Replace with <img src="../assets/logos/canes.png"> -->
+      <div class="logo-slot">🍗</div>
+      <div class="tag">RAISING CANE'S</div>
+      <h1 class="title">Finger <em>Frenzy</em></h1>
+      <p class="desc">Tap the chicken fingers as fast as you can in 30 seconds! Hit <b>40 taps</b> to unlock a tasty reward.</p>
+      <button class="btn" onclick="start()">START TAPPING</button>
+    </div>
+  </div>
+
+  <div class="screen hidden" id="over">
+    <div class="panel">
+      <div class="final-lbl">FINGERS TAPPED</div>
+      <div class="final-score" id="finalScore">0</div>
+      <div id="rewardArea"></div>
+      <button class="btn" onclick="start()">TAP AGAIN</button>
+      <button class="btn outline" onclick="share()">Share</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const COMPANY="Raising Cane's",GAME='Finger Frenzy',TARGET=40,COUPON='CANES4U',DURATION=30;
+const field=document.getElementById('field'),scoreEl=document.getElementById('score'),timerEl=document.getElementById('timer');
+let score,running,endAt,tick,current=null;
+function spawnFinger(){
+  if(current){try{current.remove()}catch(e){}}
+  const f=document.createElement('div');f.className='finger';f.textContent='🍗';
+  const rect=field.getBoundingClientRect();
+  const size=Math.min(90,rect.width*.28);
+  f.style.width=f.style.height=size+'px';
+  f.style.fontSize=(size*.6)+'px';
+  f.style.left=Math.random()*(rect.width-size)+'px';
+  f.style.top=Math.random()*(rect.height-size)+'px';
+  f.addEventListener('pointerdown',hit);
+  field.appendChild(f);current=f;
+}
+function hit(e){
+  if(!running)return;
+  e.stopPropagation();e.currentTarget.classList.add('hit');
+  score++;scoreEl.textContent=score;
+  PAfx.play(score%10===0?'powerup':'coin');
+  PAfx.burst(e.clientX,e.clientY,'#FFCC00',10);
+  const c=document.createElement('div');c.className='combo';c.textContent='+1!';
+  c.style.left=(e.clientX-field.getBoundingClientRect().left-20)+'px';
+  c.style.top=(e.clientY-field.getBoundingClientRect().top-20)+'px';
+  field.appendChild(c);setTimeout(()=>c.remove(),600);
+  setTimeout(()=>e.currentTarget.remove(),300);
+  spawnFinger();
+}
+function updateTimer(){
+  if(!running)return;
+  const left=Math.max(0,(endAt-performance.now())/1000);
+  const prev=timerEl.textContent;
+  timerEl.textContent='0:'+String(Math.ceil(left)).padStart(2,'0');
+  if(left<=5&&left>0&&prev!==timerEl.textContent)PAfx.play('tick');
+  if(left<=0){end()}
+}
+function start(){
+  document.getElementById('start').classList.add('hidden');
+  document.getElementById('over').classList.add('hidden');
+  field.innerHTML='';current=null;
+  score=0;scoreEl.textContent=0;running=true;
+  endAt=performance.now()+DURATION*1000;
+  clearInterval(tick);tick=setInterval(updateTimer,100);
+  PAfx.play('start');
+  spawnFinger();
+}
+function end(){
+  running=false;clearInterval(tick);
+  document.getElementById('finalScore').textContent=score;
+  const r=document.getElementById('rewardArea');
+  if(score>=TARGET){
+    PAfx.play('win');
+    setTimeout(()=>PAfx.burst(innerWidth/2,innerHeight/2,'#FFCC00',24),150);
+    r.innerHTML=`<div class="coupon"><div class="coupon-title">🍗 REWARD UNLOCKED 🍗</div><div class="coupon-code">${COUPON}</div><div class="coupon-sub">FREE CANIAC COMBO UPGRADE</div></div>`;
+  }else{
+    PAfx.play('gameover');
+    r.innerHTML=`<p style="font-size:13px;color:var(--dark);margin-bottom:16px;">Hit <b>${TARGET} taps</b> to unlock the reward!</p>`;
+  }
+  document.getElementById('over').classList.remove('hidden');
+}
+function share(){
+  const txt=`I tapped ${score} chicken fingers in ${GAME} by ${COMPANY}! 🍗`;
+  if(navigator.share)navigator.share({title:GAME,text:txt,url:location.href}).catch(()=>{});
+  else{navigator.clipboard?.writeText(txt+' '+location.href);alert('Copied!')}
+}
+</script>
+</body>
+</html>
