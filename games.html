@@ -22,6 +22,8 @@
     .game-thumb.tile-topgolf    { background: linear-gradient(135deg,#0B3D91,#1E5FC4); color:#F47A20; }
     .game-thumb.tile-shaveberry { background: linear-gradient(135deg,#FFE5EB,#FFB5A7); }
     .game-thumb.tile-pickle     { background: linear-gradient(135deg,#D6F549,#52B788); }
+    .game-thumb.tile-swine      { background: linear-gradient(135deg,#0B0B0B,#2A1810); color:#F4B6C2; position:relative; }
+    .game-thumb.tile-swine::after { content:''; position:absolute; inset:0; background:radial-gradient(circle at 50% 60%, rgba(168,213,160,.25), transparent 60%); pointer-events:none; }
     .game-thumb .emoji { font-size: 68px; }
 
     .badge-row { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; }
@@ -296,6 +298,21 @@
             <h3>Chip Shot</h3>
             <p>Lock your power, lock your aim, and land the perfect bullseye on a moving target.</p>
             <a href="games/10-topgolf-chip-shot.html" class="btn btn-primary" style="width:100%;justify-content:center;">Play Demo</a>
+          </div>
+        </div>
+
+        <div class="game-card" data-tags="demo coupon">
+          <div class="game-thumb tile-swine"><span class="emoji">🐷</span></div>
+          <div class="game-info">
+            <div class="badge-row">
+              <span class="chip chip-demo">Demo</span>
+              <span class="chip chip-mech">Timing</span>
+              <span class="chip chip-coupon">🎟 Coupon</span>
+            </div>
+            <div class="game-company">Swine Thyme BBQ</div>
+            <h3>Pit Master</h3>
+            <p>Tap each cut of pork at the perfect moment, chase combos, and grab thyme sprigs for bonus points. Don't let the grill burn!</p>
+            <a href="games/11-swinethyme-pit-master.html" class="btn btn-primary" style="width:100%;justify-content:center;">Play Demo</a>
           </div>
         </div>
 
