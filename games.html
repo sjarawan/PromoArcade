@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Games — PromoArcade</title>
+  <meta name="description" content="Explore the branded mini-games built by PromoArcade for real businesses. Play live demos and see what's possible." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ========== HEADER ========== -->
+  <header class="header" id="header">
+    <div class="container">
+      <a href="index.html" class="header-logo" aria-label="PromoArcade Home">
+        <img src="assets/logo.png" alt="PromoArcade" />
+      </a>
+      <nav>
+        <ul class="nav-links" id="navLinks">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="games.html" class="active">Games</a></li>
+          <li><a href="services.html">Services</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </nav>
+      <div class="nav-cta" id="navCta">
+        <a href="contact.html" class="btn btn-primary">Get Started</a>
+      </div>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ========== PAGE HEADER ========== -->
+  <section class="page-header">
+    <div class="container">
+      <span class="section-label">Portfolio</span>
+      <h1>Games We've Built</h1>
+      <p>Real branded mini-games, live and driving results for real businesses. Play them, share them, and imagine what we could build for you.</p>
+    </div>
+  </section>
+
+  <!-- ========== GAMES GRID ========== -->
+  <section class="section">
+    <div class="container">
+      <div class="games-grid">
+
+        <!--
+          ============================================================
+          GAME CARD TEMPLATE
+          To add a new game, copy this block and update:
+            1. Thumbnail image (replace placeholder div with <img>)
+            2. Company name
+            3. Game name (h3)
+            4. Description (p)
+            5. Link href to the game page
+          ============================================================
+        -->
+
+        <!-- GAME CARD 1: Shave Berry -->
+        <div class="game-card">
+          <div class="game-thumb">
+            <!-- THUMBNAIL: Replace with <img src="assets/shaveberry-thumb.png" alt="Berry Bounce"> -->
+            <div class="game-thumb-placeholder">🍓<span>Preview</span></div>
+          </div>
+          <div class="game-info">
+            <div class="game-company">Shave Berry</div>
+            <!-- GAME NAME: Update when ready -->
+            <h3>Berry Bounce</h3>
+            <p>Catch and bounce shaved berry desserts to hungry customers in this fun, fast-paced branded game built for Shave Berry. Designed to engage, entertain, and drive sharing.</p>
+            <!-- GAME LINK: Points to the Shave Berry game -->
+            <a href="games/shave-berry/index.html" class="btn btn-primary" style="width:100%;justify-content:center;">Play Game</a>
+          </div>
+        </div>
+
+        <!-- GAME CARD 2: The Flying Pickle -->
+        <div class="game-card">
+          <div class="game-thumb">
+            <!-- THUMBNAIL: Replace with <img src="assets/flyingpickle-thumb.png" alt="Kitchen Chaos"> -->
+            <div class="game-thumb-placeholder">🥒<span>Preview</span></div>
+          </div>
+          <div class="game-info">
+            <div class="game-company">The Flying Pickle</div>
+            <!-- GAME NAME: Update when ready -->
+            <h3>Kitchen Chaos</h3>
+            <p>Smash back pickleballs in this fast-paced survival game created for The Flying Pickle. Built to entertain customers, promote sharing, and drive traffic.</p>
+            <!-- GAME LINK: Points to the Flying Pickle game -->
+            <a href="games/flying-pickle/index.html" class="btn btn-primary" style="width:100%;justify-content:center;">Play Game</a>
+          </div>
+        </div>
+
+        <!--
+          ============================================================
+          ADD MORE GAME CARDS BELOW
+          Copy a game-card block above and update the details.
+          ============================================================
+        -->
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== CTA ========== -->
+  <section class="cta-banner">
+    <div class="container">
+      <h2>Want a Game Like These for Your Brand?</h2>
+      <p>We build custom branded mini-games designed to drive traffic and engagement for your business.</p>
+      <a href="contact.html" class="btn btn-white">Let's Talk</a>
+    </div>
+  </section>
+
+  <!-- ========== FOOTER ========== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <img src="assets/logo.png" alt="PromoArcade" />
+          <p>Hosted social mini-games that help businesses drive traffic, boost engagement, and power playable promotions.</p>
+        </div>
+        <div>
+          <h4>Pages</h4>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="games.html">Games</a></li>
+            <li><a href="services.html">Services</a></li>
+            <li><a href="about.html">About</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Games</h4>
+          <ul>
+            <li><a href="games/shave-berry/index.html">Shave Berry</a></li>
+            <li><a href="games/flying-pickle/index.html">The Flying Pickle</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Contact</h4>
+          <ul>
+            <li><a href="mailto:info@promoarcade.com">info@promoarcade.com</a></li>
+            <li><a href="contact.html">Contact Form</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>&copy; 2026 PromoArcade. All rights reserved.</span>
+        <span><a href="contact.html">Get in Touch</a></span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
